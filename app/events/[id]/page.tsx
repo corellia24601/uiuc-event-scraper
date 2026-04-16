@@ -16,6 +16,12 @@ interface Event {
   url: string;
   source_name: string;
   category: string;
+  sponsor: string;
+  contact: string;
+  contact_email: string;
+  views: number;
+  originating_calendar: string;
+  source_links: string;
 }
 
 export default function EventDetail() {
@@ -164,6 +170,39 @@ export default function EventDetail() {
                   <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Event Source</h3>
                   <p className="mt-2 text-lg text-gray-900">{event.source_name}</p>
                 </div>
+
+                {event.originating_calendar && (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Originating Calendar</h3>
+                    <p className="mt-2 text-lg text-gray-900">{event.originating_calendar}</p>
+                  </div>
+                )}
+
+                {event.sponsor && (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Sponsor</h3>
+                    <p className="mt-2 text-lg text-gray-900">{event.sponsor}</p>
+                  </div>
+                )}
+
+                {event.contact && (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Contact</h3>
+                    <p className="mt-2 text-lg text-gray-900">
+                      {event.contact}
+                      {event.contact_email && (
+                        <> · <a href={`mailto:${event.contact_email}`} className="text-blue-600 hover:underline">{event.contact_email}</a></>
+                      )}
+                    </p>
+                  </div>
+                )}
+
+                {event.views > 0 && (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Views</h3>
+                    <p className="mt-2 text-lg text-gray-900">{event.views.toLocaleString()}</p>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -175,18 +214,32 @@ export default function EventDetail() {
             </div>
           </div>
 
-          {event.url && (
-            <div className="border-t border-gray-200 pt-6 mt-6">
-              <a
-                href={event.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 font-medium"
-              >
-                View Original Event →
-              </a>
-            </div>
-          )}
+          {(() => {
+            let links: Array<{ name: string; url: string }> = [];
+            try { links = JSON.parse(event.source_links || '[]'); } catch {}
+            if (links.length === 0 && event.url) links = [{ name: event.source_name, url: event.url }];
+            if (links.length === 0) return null;
+            return (
+              <div className="border-t border-gray-200 pt-6 mt-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-3">
+                  {links.length === 1 ? 'Original Event' : 'Original Event Sources'}
+                </h2>
+                <div className="flex flex-wrap gap-3">
+                  {links.map((link, i) => (
+                    <a
+                      key={i}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 font-medium text-sm"
+                    >
+                      {links.length === 1 ? 'View Original Event →' : `${link.name} →`}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </main>
     </div>

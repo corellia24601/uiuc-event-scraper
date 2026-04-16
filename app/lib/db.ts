@@ -21,6 +21,14 @@ export interface EventRow {
   location: string;
   url: string;
   source_id: number;
+  // UIUC Calendar-specific attributes (empty string / 0 for other sources)
+  sponsor: string;
+  contact: string;
+  contact_email: string;
+  views: number;
+  originating_calendar: string;
+  /** JSON-encoded Array<{ name: string; url: string }> — all sources this event was found in */
+  source_links: string;
 }
 
 interface DbState {
@@ -28,59 +36,40 @@ interface DbState {
   events: EventRow[];
 }
 
-// Resolve data.json location - check multiple possible locations
-const getDbPath = () => {
-  const possiblePaths = [
-    // Absolute path to project
-    'D:\\a_NTU\\CV\\DTX 451\\uiuc-event-scraper\\data.json',
-    
-    // Try current working directory
-    path.join(process.cwd(), 'data.json'),
-    
-    // Try parent directories
-    path.join(process.cwd(), '..', 'data.json'),
-    path.join(process.cwd(), '..', '..', 'data.json'),
-    path.join(process.cwd(), '..', '..', '..', 'uiuc-event-scraper', 'data.json'),
-  ];
-
-  for (const checkPath of possiblePaths) {
-    if (fs.existsSync(checkPath)) {
-      return checkPath;
-    }
-  }
-
-  // Default fallback
-  return 'D:\\a_NTU\\CV\\DTX 451\\uiuc-event-scraper\\data.json';
-};
+const DB_PATH = path.join(process.cwd(), 'data.json');
 
 function readDb(): DbState {
-  const dbPath = getDbPath();
-  
-  if (!fs.existsSync(dbPath)) {
+  if (!fs.existsSync(DB_PATH)) {
     const initial: DbState = { sources: [], events: [] };
-    fs.writeFileSync(dbPath, JSON.stringify(initial, null, 2), 'utf8');
+    fs.writeFileSync(DB_PATH, JSON.stringify(initial, null, 2), 'utf8');
     return initial;
   }
 
-  const raw = fs.readFileSync(dbPath, 'utf8');
+  const raw = fs.readFileSync(DB_PATH, 'utf8');
   try {
     return JSON.parse(raw) as DbState;
   } catch {
     const initial: DbState = { sources: [], events: [] };
-    fs.writeFileSync(dbPath, JSON.stringify(initial, null, 2), 'utf8');
+    fs.writeFileSync(DB_PATH, JSON.stringify(initial, null, 2), 'utf8');
     return initial;
   }
 }
 
 function writeDb(data: DbState) {
-  const dbPath = getDbPath();
-  fs.writeFileSync(dbPath, JSON.stringify(data, null, 2), 'utf8');
+  fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf8');
 }
 
 function joinEvent(event: EventRow, sources: SourceRow[]) {
   const source = sources.find((s) => s.id === event.source_id);
   return {
     ...event,
+    // Provide defaults for fields that may be missing in older stored records
+    sponsor: event.sponsor ?? '',
+    contact: event.contact ?? '',
+    contact_email: event.contact_email ?? '',
+    views: event.views ?? 0,
+    originating_calendar: event.originating_calendar ?? '',
+    source_links: event.source_links ?? '[]',
     source_name: source?.name || 'Unknown Source',
     category: source?.category || 'Uncategorized',
   };
@@ -131,20 +120,26 @@ export const deleteSource = {
 };
 
 export const insertEvent = {
-  run: (title: string, description: string, start_date: string, end_date: string, start_time: string, end_time: string, location: string, url: string, source_id: number) => {
+  run: (
+    title: string, description: string,
+    start_date: string, end_date: string,
+    start_time: string, end_time: string,
+    location: string, url: string,
+    source_id: number,
+    sponsor = '', contact = '', contact_email = '', views = 0, originating_calendar = '',
+    source_links = '[]'
+  ) => {
     const db = readDb();
     const nextId = db.events.length > 0 ? Math.max(...db.events.map((event) => event.id), 0) + 1 : 1;
     db.events.push({
       id: nextId,
-      title,
-      description,
-      start_date,
-      end_date,
-      start_time,
-      end_time,
-      location,
-      url,
+      title, description,
+      start_date, end_date,
+      start_time, end_time,
+      location, url,
       source_id,
+      sponsor, contact, contact_email, views, originating_calendar,
+      source_links,
     });
     writeDb(db);
   },
@@ -160,24 +155,33 @@ export const getEvents = {
   },
 };
 
+/** An event is "upcoming" if it hasn't fully ended yet.
+ *  For multi-day events (start ≠ end) use end_date; otherwise use start_date. */
+function isUpcoming(event: EventRow, today: string): boolean {
+  const cutoff = event.end_date && event.end_date > event.start_date
+    ? event.end_date
+    : event.start_date;
+  return cutoff >= today;
+}
+
 export const getUpcomingEvents = {
   all: (today: string) => {
     const db = readDb();
     return db.events
-      .filter((event) => event.start_date >= today)
+      .filter((event) => isUpcoming(event, today))
       .sort((a, b) => a.start_date.localeCompare(b.start_date))
       .map((event) => joinEvent(event, db.sources));
   },
 };
 
 export const searchEvents = {
-  all: (titleQuery: string, descriptionQuery: string, today: string) => {
+  all: (query: string, today: string) => {
     const db = readDb();
-    const query = titleQuery.toLowerCase();
+    const q = query.toLowerCase();
     return db.events
       .filter((event) =>
-        event.start_date >= today &&
-        (event.title.toLowerCase().includes(query) || event.description.toLowerCase().includes(query))
+        isUpcoming(event, today) &&
+        (event.title.toLowerCase().includes(q) || event.description.toLowerCase().includes(q))
       )
       .sort((a, b) => a.start_date.localeCompare(b.start_date))
       .map((event) => joinEvent(event, db.sources));

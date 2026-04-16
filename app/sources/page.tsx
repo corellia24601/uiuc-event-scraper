@@ -116,6 +116,27 @@ export default function SourcesPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Active / Total summary */}
+        {sources.length > 0 && (() => {
+          const activeCount = sources.filter(s => s.active).length;
+          const total = sources.length;
+          const pct = Math.round((activeCount / total) * 100);
+          return (
+            <div className="flex items-center gap-4 bg-white rounded-lg shadow-sm px-6 py-4 mb-6 border border-gray-100">
+              <div className="flex-1">
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className="text-2xl font-bold text-gray-900">{activeCount}</span>
+                  <span className="text-gray-500">/ {total} sources active</span>
+                  <span className="ml-auto text-sm text-gray-400">{pct}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-green-500 h-2 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
         {showForm && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
             <h2 className="text-xl font-semibold mb-4">

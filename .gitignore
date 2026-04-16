@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# runtime database files (generated at runtime, not source)
+data.json
+events.db
+events.db-shm
+events.db-wal

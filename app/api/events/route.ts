@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getEvents, getUpcomingEvents, searchEvents } from '../../lib/db';
+import { getUpcomingEvents, searchEvents } from '../../lib/db';
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     let events;
     if (query && query.trim().length > 0) {
       const searchTerm = query.trim();
-      events = searchEvents.all(searchTerm, searchTerm, today);
+      events = searchEvents.all(searchTerm, today);
     } else {
       events = getUpcomingEvents.all(today);
     }
