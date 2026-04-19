@@ -1,0 +1,9 @@
+[build]
+# Install Playwright's Chromium + its Linux system dependencies, then build Next.js
+buildCommand = "npm ci && npx playwright install chromium --with-deps && npm run build"
+
+[deploy]
+startCommand = "npm start"
+healthcheckPath = "/"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"

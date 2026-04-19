@@ -33,14 +33,14 @@ export const initialSources: Source[] = [
   { id: 7,  category: "Colleges & Schools", name: "Grainger Student Engagement",               url: "https://students.grainger.illinois.edu/events",     notes: "INACTIVE: connection refused (private CampusGroups portal)", active: false },
   { id: 9,  category: "Colleges & Schools", name: "College of LAS",                            url: "https://calendars.illinois.edu/list/6324",          notes: "LAS events – via UIUC calendar",                         active: true },
   { id: 12, category: "Colleges & Schools", name: "College of Law",                            url: "https://law.illinois.edu/events",                    notes: "INACTIVE: URL returns 404",                              active: false },
-  { id: 16, category: "Colleges & Schools", name: "ACES",                                      url: "https://aces.illinois.edu/news-events/events",       notes: "INACTIVE: events loaded via JavaScript",                 active: false },
+  { id: 16, category: "Colleges & Schools", name: "ACES",                                      url: "https://calendars.illinois.edu/list/5784",           notes: "ACES events – via embedded UIUC calendar",               active: true },
   { id: 17, category: "Colleges & Schools", name: "School of Information Sciences",            url: "https://ischool.illinois.edu/news-events/events",    notes: "INACTIVE: no events in static HTML",                     active: false },
 
   // ── Arts & Performance ───────────────────────────────────────────────────
   { id: 10, category: "Arts & Performance", name: "College of Fine & Applied Arts",           url: "https://faa.illinois.edu/about/events",       notes: "FAA college events",                        active: true },
   { id: 19, category: "Arts & Performance", name: "Krannert Center for the Performing Arts", url: "https://krannertcenter.com/calendar",          notes: "Theatre, dance, music performances",        active: true },
   { id: 49, category: "Arts & Performance", name: "Illinois School of Music",                url: "https://music.illinois.edu/events/",           notes: "Performances: orchestras, bands, soloists", active: true },
-  { id: 20, category: "Arts & Performance", name: "Krannert Art Museum",                     url: "https://kam.illinois.edu/exhibitions-events/events", notes: "INACTIVE: events loaded via JavaScript",  active: false },
+  { id: 20, category: "Arts & Performance", name: "Krannert Art Museum",                     url: "https://kam.illinois.edu/exhibitions-events/events", notes: "Browser-rendered Drupal views list",       active: true },
   { id: 21, category: "Arts & Performance", name: "State Farm Center",                       url: "https://www.statefarmcenter.com/events",       notes: "INACTIVE: Angular app – requires JS",       active: false },
   { id: 22, category: "Arts & Performance", name: "Spurlock Museum",                         url: "https://spurlock.illinois.edu/programs/index.html", notes: "INACTIVE: URL returns 404",              active: false },
 
@@ -53,11 +53,11 @@ export const initialSources: Source[] = [
   { id: 27, category: "Research Centers & Labs", name: "NCSA",                                   url: "https://calendars.illinois.edu/list/7097", notes: "NCSA events – via UIUC calendar",          active: true },
   { id: 29, category: "Research Centers & Labs", name: "Prairie Research Institute",             url: "https://calendars.illinois.edu/list/6191", notes: "Prairie Research – via UIUC calendar",     active: true },
   { id: 30, category: "Research Centers & Labs", name: "Center for Innovation in Teaching & Learning", url: "https://calendars.illinois.edu/list/8416", notes: "CITL events – via UIUC calendar",     active: true },
-  { id: 26, category: "Research Centers & Labs", name: "Beckman Institute",                      url: "https://beckman.illinois.edu/visit/events-at-beckman", notes: "INACTIVE: Angular app – requires JS",  active: false },
-  { id: 28, category: "Research Centers & Labs", name: "Illinois Informatics Institute",         url: "https://informatics.illinois.edu/events",              notes: "INACTIVE: Angular app – requires JS",  active: false },
+  { id: 26, category: "Research Centers & Labs", name: "Beckman Institute",                      url: "https://beckman.illinois.edu/visit/events-at-beckman", notes: "Browser-rendered Angular app",         active: true },
+  { id: 28, category: "Research Centers & Labs", name: "Illinois Informatics Institute",         url: "https://calendars.illinois.edu/list/8316",             notes: "Informatics events – via embedded UIUC calendar", active: true },
 
   // ── Design & Innovation ──────────────────────────────────────────────────
-  { id: 31, category: "Design & Innovation", name: "Siebel Center for Design",  url: "https://designcenter.illinois.edu/events",              notes: "INACTIVE: Angular app – requires JS",  active: false },
+  { id: 31, category: "Design & Innovation", name: "Siebel Center for Design",  url: "https://calendars.illinois.edu/list/7059",              notes: "Siebel events – via embedded UIUC calendar",  active: true },
   { id: 32, category: "Design & Innovation", name: "EnterpriseWorks",           url: "https://researchpark.illinois.edu/enterpriseworks/events/", notes: "INACTIVE: server returns 403",        active: false },
   { id: 33, category: "Design & Innovation", name: "Illinois Research Park",    url: "https://researchpark.illinois.edu/events/",             notes: "INACTIVE: server returns 403",         active: false },
 

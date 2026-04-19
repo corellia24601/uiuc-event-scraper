@@ -36,7 +36,7 @@ interface DbState {
   events: EventRow[];
 }
 
-const DB_PATH = path.join(process.cwd(), 'data.json');
+const DB_PATH = path.join(process.env.DATA_DIR ?? process.cwd(), 'data.json');
 
 function readDb(): DbState {
   if (!fs.existsSync(DB_PATH)) {

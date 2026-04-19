@@ -622,6 +622,121 @@ async function enrichDrupalLocations(events: EventData[]): Promise<EventData[]> 
   return events;
 }
 
+// ─── 5. Browser-based fetching (Playwright) ──────────────────────────────────
+
+let _browser: import('playwright').Browser | null = null;
+
+async function fetchHtmlWithBrowser(url: string): Promise<string | null> {
+  try {
+    const { chromium } = await import('playwright');
+    if (!_browser || !_browser.isConnected()) {
+      _browser = await chromium.launch({ headless: true });
+    }
+    const page = await _browser.newPage();
+    await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
+    const html = await page.content();
+    await page.close();
+    return html;
+  } catch (e) {
+    console.error(`[Scraper] Browser fetch error for ${url}:`, e);
+    return null;
+  }
+}
+
+async function closeBrowser(): Promise<void> {
+  if (_browser) { await _browser.close().catch(() => {}); _browser = null; }
+}
+
+// ─── 6. Parser: Beckman Institute (Angular) ───────────────────────────────────
+// Page: beckman.illinois.edu/visit/events-at-beckman
+// Each event is an <li class="event-card"> with an <add-to-calendar-button>
+// element that carries ISO startdate/enddate/starttime/endtime attributes.
+
+function parseBeckmanHTML(html: string): EventData[] {
+  const events: EventData[] = [];
+  // Split on li.event-card boundaries
+  const cards = html.match(/<li[^>]*class="[^"]*event-card[^"]*"[\s\S]*?(?=<li[^>]*class="[^"]*event-card|<\/ul>)/g) ?? [];
+
+  const to12h = (t: string): string => {
+    if (!t) return '';
+    const [h, m] = t.split(':').map(Number);
+    return `${h % 12 || 12}:${String(m).padStart(2, '0')}${h >= 12 ? 'pm' : 'am'}`;
+  };
+
+  for (const card of cards) {
+    const title = (card.match(/<h2[^>]*class="event--title"[^>]*>([^<]+)/) ??
+                   card.match(/\btitle="([^"]+)"/))?.[1]?.trim() ?? '';
+    if (!title) continue;
+
+    const startdate = card.match(/\bstartdate="(\d{4}-\d{2}-\d{2})"/)?.[1];
+    if (!startdate) continue;
+    const enddate   = card.match(/\benddate="(\d{4}-\d{2}-\d{2})"/)?.[1] ?? startdate;
+    const start_time = to12h(card.match(/\bstarttime="(\d{2}:\d{2})"/)?.[1] ?? '');
+    const end_time   = to12h(card.match(/\bendtime="(\d{2}:\d{2})"/)?.[1] ?? '');
+    const location   = card.match(/<p[^>]*class="event--location"[^>]*>([^<]+)/)?.[1]?.trim() ?? '';
+
+    events.push({
+      title, description: '',
+      start_date: startdate, end_date: enddate,
+      start_time, end_time, location,
+      url: 'https://beckman.illinois.edu/visit/events-at-beckman',
+      sponsor: '', contact: '', contact_email: '', views: 0, originating_calendar: '',
+    });
+  }
+  return events;
+}
+
+// ─── 7. Parser: Krannert Art Museum (Drupal views) ───────────────────────────
+// Page: kam.illinois.edu/exhibitions-events/events
+// Events in <div class="views-row"> with event-time "Apr 23, 5:30–7 pm"
+
+function parseKAMHTML(html: string): EventData[] {
+  const events: EventData[] = [];
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0, 10);
+  const rows = html.match(/<div class="views-row">[\s\S]*?(?=<div class="views-row">|$)/g) ?? [];
+
+  for (const row of rows) {
+    const href = row.match(/href="(\/event\/[^"]+)"/)?.[1];
+    if (!href) continue;
+
+    const title = row.match(/<div class="views-field views-field-title">[\s\S]*?<span class="field-content">([^<]+)/)?.[1]?.trim() ?? '';
+    if (!title) continue;
+
+    const eventTimeText = row.match(/<div class="event-time">([^<]+)/)?.[1]?.trim() ?? '';
+    // Format: "Apr 23, 5:30–7 pm" or "May 1, 5:30–7 am"
+    const dateMatch = eventTimeText.match(/^([A-Za-z]{3})\s+(\d{1,2})/);
+    if (!dateMatch) continue;
+    const mm = MONTH_ABBR_MAP[dateMatch[1].toUpperCase()];
+    if (!mm) continue;
+
+    let year = today.getFullYear();
+    let start_date = `${year}-${mm}-${dateMatch[2].padStart(2, '0')}`;
+    if (start_date < todayStr) start_date = `${year + 1}-${mm}-${dateMatch[2].padStart(2, '0')}`;
+
+    // Time: "5:30–7 pm" — end time may have no minutes
+    let start_time = '', end_time = '';
+    const raw = eventTimeText.replace(/^[A-Za-z]+ \d+,\s*/, '');
+    const tMatch = raw.match(/(\d{1,2}):(\d{2})\s*(am|pm)?\s*[-–]\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
+    if (tMatch) {
+      const [, sh, sm, sp, eh, em, ep] = tMatch;
+      const ep2 = ep.toLowerCase(), sp2 = (sp ?? ep2).toLowerCase();
+      start_time = `${sh}:${sm}${sp2}`;
+      end_time   = `${eh}:${em ?? '00'}${ep2}`;
+    }
+
+    events.push({
+      title, description: '',
+      start_date, end_date: start_date,
+      start_time, end_time,
+      location: 'Krannert Art Museum',
+      url: `https://kam.illinois.edu${href}`,
+      sponsor: '', contact: '', contact_email: '', views: 0, originating_calendar: '',
+    });
+  }
+  return events;
+}
+
 // ─── Dispatcher ───────────────────────────────────────────────────────────────
 
 async function scrapeSource(url: string): Promise<EventData[]> {
@@ -630,6 +745,14 @@ async function scrapeSource(url: string): Promise<EventData[]> {
   // Known parsers by URL pattern
   if (isUIUCCalendarUrl(u)) return scrapeUIUCCalendar(u);
   if (/krannertcenter\.com\/calendar/i.test(u)) return scrapeKrannertWithDetails(u);
+  if (/beckman\.illinois\.edu\/visit\/events/i.test(u)) {
+    const html = await fetchHtmlWithBrowser(u);
+    return html ? parseBeckmanHTML(html) : [];
+  }
+  if (/kam\.illinois\.edu\/exhibitions-events\/events/i.test(u)) {
+    const html = await fetchHtmlWithBrowser(u);
+    return html ? parseKAMHTML(html) : [];
+  }
 
   // Auto-detect by fetching and examining the HTML
   const html = await fetchHtml(u);
@@ -665,34 +788,41 @@ interface CollectedEvent extends EventData {
  * data from every duplicate and records all source URLs for the detail page.
  */
 function deduplicateEvents(events: CollectedEvent[]): Array<CollectedEvent & { source_links: string }> {
+  // General string normaliser
   const norm = (s: string) => s.toLowerCase().replace(/\s+/g, ' ').trim();
 
-  // ── Step 1: group by title + date + time (location handled below) ─────────
+  // Time normaliser: collapse the space before am/pm so "7:30 pm" and "7:30pm" match
+  const normTime = (s: string) => norm(s).replace(/(\d)\s+(am|pm)/gi, '$1$2');
+
+  // Location normaliser: strip comma-delimited suffixes for comparison only
+  // "Foellinger Great Hall, Krannert Center" → "foellinger great hall"
+  // This lets a venue listed with and without its parent building still match.
+  const normLoc = (s: string) => norm(s.split(',')[0]);
+
+  // ── Step 1: group by title + date + normalised time ───────────────────────
   const keyMap = new Map<string, CollectedEvent[]>();
   for (const event of events) {
-    const key = [norm(event.title), event.start_date, norm(event.start_time)].join('|||');
+    const key = [norm(event.title), event.start_date, normTime(event.start_time)].join('|||');
     if (!keyMap.has(key)) keyMap.set(key, []);
     keyMap.get(key)!.push(event);
   }
 
   // ── Step 2: within each group split on location when values conflict ──────
-  // Groups where all non-empty locations agree (or some are empty) → merge all.
-  // Groups with multiple *different* non-empty locations → split into per-location
-  // buckets; events with no location fold into the largest bucket.
+  // Uses normLoc so "Foellinger Great Hall, Krannert Center" and
+  // "Foellinger Great Hall" are treated as the same venue.
+  // Empty location is treated as a wildcard (merges with any location group).
   const mergeSets: CollectedEvent[][] = [];
 
   for (const group of keyMap.values()) {
-    const nonEmptyLocs = [...new Set(group.map(e => norm(e.location)).filter(Boolean))];
+    const nonEmptyNormLocs = [...new Set(group.map(e => normLoc(e.location)).filter(Boolean))];
 
-    if (nonEmptyLocs.length <= 1) {
-      // All agree (or all empty) — one merge set
+    if (nonEmptyNormLocs.length <= 1) {
       mergeSets.push(group);
     } else {
-      // Split by distinct location; fold empty-location events into the largest bucket
       const buckets = new Map<string, CollectedEvent[]>();
       const noLoc: CollectedEvent[] = [];
       for (const e of group) {
-        const l = norm(e.location);
+        const l = normLoc(e.location);
         if (!l) { noLoc.push(e); continue; }
         if (!buckets.has(l)) buckets.set(l, []);
         buckets.get(l)!.push(e);
@@ -715,7 +845,7 @@ function deduplicateEvents(events: CollectedEvent[]): Array<CollectedEvent & { s
     const end_date = group
       .map(e => e.end_date || e.start_date).sort().at(-1) ?? primary.end_date;
 
-    // First non-empty value wins
+    // First non-empty value wins for most fields
     const pick = <K extends keyof CollectedEvent>(field: K): CollectedEvent[K] =>
       (group.find(e => e[field])?.[field]) ?? primary[field];
 
@@ -723,7 +853,9 @@ function deduplicateEvents(events: CollectedEvent[]): Array<CollectedEvent & { s
     const contact              = pick('contact') as string;
     const contact_email        = pick('contact_email') as string;
     const originating_calendar = pick('originating_calendar') as string;
-    const location             = pick('location') as string;
+    // For location, prefer the most specific (longest) non-empty value
+    const location = group.map(e => e.location).filter(Boolean)
+      .sort((a, b) => b.length - a.length)[0] ?? primary.location;
     const views = Math.max(...group.map(e => e.views ?? 0));
 
     const seenUrls = new Set<string>();
@@ -788,6 +920,7 @@ export async function runScrape(): Promise<{ total: number; errors: string[] }> 
     );
   }
 
+  await closeBrowser();
   console.log(`[Scraper] Done. Total unique events stored: ${merged.length}`);
   return { total: merged.length, errors };
 }

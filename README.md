@@ -1,114 +1,140 @@
 # UIUC Event Scraper
 
-A web application for scraping and searching events from University of Illinois Urbana-Champaign (UIUC) and its affiliates. Built with Next.js, featuring a searchable event database and an editable source pool.
+A Next.js web app that aggregates upcoming events from 30+ UIUC sources into one searchable, filterable feed. Events are scraped automatically on startup and refreshed every hour.
+
+**Live demo:** *(add your Railway URL here once deployed)*
+
+---
 
 ## Features
 
-- **Event Search**: Search through scraped events with a user-friendly interface
-- **Source Management**: Add, edit, and manage event sources from official UIUC calendars
-- **Automatic Scraping**: Scrape events from iCal feeds and HTML pages
-- **Database Storage**: Persistent storage using SQLite
+- **30+ active sources** — central calendars, colleges, arts venues, research centers, athletics, libraries, and more
+- **Full-text search** across title and description
+- **Filters** — date range, event host, originating calendar; sort by date or popularity
+- **Cross-source deduplication** — the same event appearing on multiple sites is merged into one card, with links to all original pages
+- **Auto-scrape** — runs 3 seconds after server start, then every hour
+- **Source pool management** — add, edit, enable/disable sources at `/sources`
+- **Playwright browser rendering** — Beckman Institute and Krannert Art Museum use a headless Chromium browser to scrape JavaScript-rendered pages
 
-## Getting Started
+---
+
+## Local Development
 
 ### Prerequisites
+- Node.js 20+
+- npm
 
-- Node.js (version 18 or higher)
-- npm or yarn
+### Setup
 
-### Installation
+```bash
+git clone https://github.com/corellia24601/uiuc-event-scraper.git
+cd uiuc-event-scraper
+npm install
+npx playwright install chromium   # one-time: downloads the headless browser
+npm run dev
+```
 
-1. Clone the repository and navigate to the project directory
-2. Install dependencies:
-   ```bash
-   npm install
+Open [http://localhost:3000](http://localhost:3000).
+
+On first run the source pool is empty — click **Initialize Sources** to populate it, then **Scrape Events** to fetch events. The scraper also runs automatically 3 seconds after the server starts.
+
+### Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `DATA_DIR` | project root | Directory where `data.json` is stored. Set to a persistent volume path in production. |
+
+Copy `.env.example` to `.env.local` and edit as needed for local overrides.
+
+---
+
+## Deployment (Railway — recommended)
+
+Railway runs the app as a persistent Node.js process, which means:
+- `data.json` can be stored on a persistent **Volume** (survives redeploys)
+- Playwright/Chromium works (no serverless size limits)
+- The hourly scrape timer in `instrumentation.ts` runs continuously
+
+### Steps
+
+1. **Create a Railway account** at [railway.app](https://railway.app) (free tier available)
+
+2. **New project → Deploy from GitHub repo** — connect your fork of this repo
+
+3. **Add a Volume** so scraped data survives redeploys:
+   - In your Railway service → **Volumes** → Add Volume
+   - Mount path: `/data`
+
+4. **Set environment variables** in Railway → **Variables**:
+   ```
+   DATA_DIR=/data
    ```
 
-### Database Setup
-
-The application uses SQLite for data storage. The database file (`events.db`) will be created automatically when the application starts.
-
-### Running the Application
-
-1. Start the development server:
-   ```bash
-   npm run dev
+5. Railway will automatically use the build command from `railway.toml`:
    ```
+   npm ci && npx playwright install chromium --with-deps && npm run build
+   ```
+   and start with `npm start`.
 
-2. Open [http://localhost:3000](http://localhost:3000) in your browser
+6. Once deployed, open the Railway URL, click **Initialize Sources**, then **Scrape Events**.
 
-### Initial Setup
+> **Note:** The first scrape takes 3–5 minutes because it fetches a detail page for every UIUC Calendar event to extract descriptions and accurate end dates.
 
-1. Go to the Sources page (`/sources`)
-2. Click "Initialize Sources" to load the default UIUC event sources
-3. Click "Scrape Events" to fetch events from active sources
-4. Return to the home page to search through the events
+---
 
-## Usage
+## Architecture
 
-### Searching Events
+```
+app/
+  lib/
+    db.ts          # Flat-file JSON database (data.json)
+    scraper.ts     # All scrapers + cross-source deduplication
+    sources.ts     # Initial source pool (50 sources, 30 active)
+  api/
+    events/        # GET /api/events, GET /api/events/[id]
+    scrape/        # POST /api/scrape
+    sources/       # GET/POST /api/sources, PATCH/DELETE /api/sources/[id]
+  page.tsx         # Main events feed
+  events/[id]/     # Event detail page
+  sources/         # Source pool management page
+instrumentation.ts # Startup + hourly scrape timer
+```
 
-- Use the search bar on the home page to find events by title or description
-- Events are displayed with date, location, and source information
-- Click on event links to view more details
+### Scraper Parsers
 
-### Managing Sources
+| Parser | Sites |
+|---|---|
+| UIUC Calendar (`calendars.illinois.edu`) | 20+ sources via the campus calendar system |
+| Illinois WordPress Theme | music.illinois.edu, faa.illinois.edu |
+| Drupal Event Articles | giesbusiness.illinois.edu, education.illinois.edu |
+| Krannert Center | krannertcenter.com (fetches detail pages for venue/time) |
+| Beckman Institute | beckman.illinois.edu (Playwright — Angular app) |
+| Krannert Art Museum | kam.illinois.edu (Playwright — JS-rendered Drupal) |
 
-- Visit `/sources` to view and manage event sources
-- Add new sources by clicking "Add Source"
-- Edit existing sources by clicking "Edit"
-- Toggle sources on/off using the Active checkbox
-- Delete sources if no longer needed
+### Database
 
-### Scraping Events
+`data.json` is a plain JSON file:
+```json
+{ "sources": [...], "events": [...] }
+```
 
-- Click "Scrape Events" on the home page to update the event database
-- The scraper processes all active sources and updates the database
-- This may take some time depending on the number of sources
+No migrations or setup required. To reset all scraped events, delete `data.json` and restart.
 
-## API Endpoints
+---
 
-- `GET /api/events` - Retrieve events (with optional search query)
-- `POST /api/scrape` - Trigger event scraping
-- `GET /api/sources` - Get all sources
-- `POST /api/sources` - Create a new source
-- `GET /api/sources/[id]` - Get a specific source
-- `PUT /api/sources/[id]` - Update a source
-- `DELETE /api/sources/[id]` - Delete a source
-- `POST /api/init` - Initialize default sources
+## Adding a New Source
 
-## Technologies Used
+1. Go to `/sources` → **Add Source**
+2. Fill in category, name, and URL
+3. The scraper auto-detects the parser (UIUC Calendar, WP Theme, Drupal) from the URL/HTML
+4. If the source needs JavaScript rendering, add a Playwright-based parser in `app/lib/scraper.ts` and register it in `scrapeSource()`
 
-- **Frontend**: Next.js, React, TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes
-- **Database**: SQLite with better-sqlite3
-- **Scraping**: node-ical for iCal feeds, cheerio for HTML parsing
-- **Search**: Fuse.js for fuzzy search
+---
 
 ## Contributing
 
-1. Add new sources through the web interface
-2. Improve scraping logic for additional calendar formats
-3. Enhance the search functionality
-4. Add more event metadata
+Pull requests welcome. Key files:
 
-## License
-
-This project is for educational purposes. Please respect the terms of service of the scraped websites.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **New parser** — add a function in `app/lib/scraper.ts` and register it in `scrapeSource()`
+- **New source** — add to `initialSources` in `app/lib/sources.ts`
+- **UI changes** — `app/page.tsx` (feed), `app/events/[id]/page.tsx` (detail)

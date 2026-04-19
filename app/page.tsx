@@ -151,6 +151,22 @@ export default function Home() {
     applyFilters(allEvents, searchQuery, dateFrom, newDate, selectedSources, selectedOriginatingCalendars, sortBy);
   };
 
+  const handleSourceToggle = (source: string) => {
+    const next = selectedSources.includes(source)
+      ? selectedSources.filter(s => s !== source)
+      : [...selectedSources, source];
+    setSelectedSources(next);
+    applyFilters(allEvents, searchQuery, dateFrom, dateTo, next, selectedOriginatingCalendars, sortBy);
+  };
+
+  const handleOrigCalToggle = (cal: string) => {
+    const next = selectedOriginatingCalendars.includes(cal)
+      ? selectedOriginatingCalendars.filter(c => c !== cal)
+      : [...selectedOriginatingCalendars, cal];
+    setSelectedOriginatingCalendars(next);
+    applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, next, sortBy);
+  };
+
   const handleClearFilters = () => {
     setDateFrom('');
     setDateTo('');
@@ -279,77 +295,48 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Date Range Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {/* Date Range + Sort By */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            {/* Start Date */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium text-gray-700">Start Date</label>
+                {dateFrom && (
+                  <button type="button" onClick={() => handleDateFromChange('')}
+                    className="text-xs text-gray-400 hover:text-red-500">
+                    Clear ×
+                  </button>
+                )}
+              </div>
               <input
-                type="date"
-                lang="en-US"
-                value={dateFrom}
+                type="date" lang="en-US" value={dateFrom}
                 onChange={(e) => handleDateFromChange(e.target.value)}
                 disabled={searching || scraping}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
             </div>
+
+            {/* End Date */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium text-gray-700">End Date</label>
+                {dateTo && (
+                  <button type="button" onClick={() => handleDateToChange('')}
+                    className="text-xs text-gray-400 hover:text-red-500">
+                    Clear ×
+                  </button>
+                )}
+              </div>
               <input
-                type="date"
-                lang="en-US"
-                value={dateTo}
+                type="date" lang="en-US" value={dateTo}
                 onChange={(e) => handleDateToChange(e.target.value)}
                 disabled={searching || scraping}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
             </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Event Host</label>
-              <select
-                multiple
-                value={selectedSources}
-                onChange={(e) => {
-                  const newSources = Array.from(e.target.selectedOptions, option => option.value);
-                  setSelectedSources(newSources);
-                  applyFilters(allEvents, searchQuery, dateFrom, dateTo, newSources, selectedOriginatingCalendars, sortBy);
-                }}
-                disabled={searching || scraping || uniqueSources.length === 0}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed h-20"
-              >
-                {uniqueSources.map(source => (
-                  <option key={source} value={source}>
-                    {source}
-                  </option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
-            </div>
-          </div>
 
-          {/* Originating Calendar + Sort By */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            {uniqueOriginatingCalendars.length > 0 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Originating Calendar</label>
-                <select
-                  multiple
-                  value={selectedOriginatingCalendars}
-                  onChange={(e) => {
-                    const newCals = Array.from(e.target.selectedOptions, o => o.value);
-                    setSelectedOriginatingCalendars(newCals);
-                    applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, newCals, sortBy);
-                  }}
-                  disabled={searching || scraping}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed h-24"
-                >
-                  {uniqueOriginatingCalendars.map(cal => (
-                    <option key={cal} value={cal}>{cal}</option>
-                  ))}
-                </select>
-                <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
-              </div>
-            )}
-            <div>
+            {/* Sort By */}
+            <div className="lg:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
               <select
                 value={sortBy}
@@ -365,6 +352,87 @@ export default function Home() {
                 <option value="views">Views (Most Popular First)</option>
               </select>
             </div>
+          </div>
+
+          {/* Event Host + Originating Calendar — checkbox lists */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            {/* Event Host */}
+            {uniqueSources.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Event Host
+                    {selectedSources.length > 0 && (
+                      <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                        {selectedSources.length} selected
+                      </span>
+                    )}
+                  </label>
+                  {selectedSources.length > 0 && (
+                    <button type="button"
+                      onClick={() => { setSelectedSources([]); applyFilters(allEvents, searchQuery, dateFrom, dateTo, [], selectedOriginatingCalendars, sortBy); }}
+                      className="text-xs text-gray-400 hover:text-red-500">
+                      Clear ×
+                    </button>
+                  )}
+                </div>
+                <div className="border border-gray-300 rounded-md max-h-44 overflow-y-auto bg-white divide-y divide-gray-100">
+                  {uniqueSources.map(source => (
+                    <label key={source}
+                      className={`flex items-center gap-3 px-3 py-2 cursor-pointer text-sm select-none transition-colors ${selectedSources.includes(source) ? 'bg-blue-50 text-blue-800' : 'hover:bg-gray-50 text-gray-800'}`}>
+                      <input
+                        type="checkbox"
+                        checked={selectedSources.includes(source)}
+                        onChange={() => handleSourceToggle(source)}
+                        disabled={searching || scraping}
+                        className="accent-blue-600 w-4 h-4 shrink-0"
+                      />
+                      {source}
+                    </label>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-400 mt-1">Check one or more hosts to filter</p>
+              </div>
+            )}
+
+            {/* Originating Calendar */}
+            {uniqueOriginatingCalendars.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Originating Calendar
+                    {selectedOriginatingCalendars.length > 0 && (
+                      <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                        {selectedOriginatingCalendars.length} selected
+                      </span>
+                    )}
+                  </label>
+                  {selectedOriginatingCalendars.length > 0 && (
+                    <button type="button"
+                      onClick={() => { setSelectedOriginatingCalendars([]); applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, [], sortBy); }}
+                      className="text-xs text-gray-400 hover:text-red-500">
+                      Clear ×
+                    </button>
+                  )}
+                </div>
+                <div className="border border-gray-300 rounded-md max-h-44 overflow-y-auto bg-white divide-y divide-gray-100">
+                  {uniqueOriginatingCalendars.map(cal => (
+                    <label key={cal}
+                      className={`flex items-center gap-3 px-3 py-2 cursor-pointer text-sm select-none transition-colors ${selectedOriginatingCalendars.includes(cal) ? 'bg-blue-50 text-blue-800' : 'hover:bg-gray-50 text-gray-800'}`}>
+                      <input
+                        type="checkbox"
+                        checked={selectedOriginatingCalendars.includes(cal)}
+                        onChange={() => handleOrigCalToggle(cal)}
+                        disabled={searching || scraping}
+                        className="accent-blue-600 w-4 h-4 shrink-0"
+                      />
+                      {cal}
+                    </label>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-400 mt-1">Check one or more calendars to filter</p>
+              </div>
+            )}
           </div>
 
           {/* Clear Filters Button */}
@@ -423,7 +491,7 @@ export default function Home() {
               events.map((event) => (
                 <Link key={event.id} href={`/events/${event.id}`}>
                   <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer">
-                    {/* Title row */}
+                    {/* Title row — full width */}
                     <div className="flex justify-between items-start gap-3 mb-3">
                       <h3 className="text-lg font-semibold text-gray-900 leading-snug">{event.title}</h3>
                       <span className="shrink-0 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded whitespace-nowrap">
