@@ -5,12 +5,10 @@ import { runScrape, scrapeState } from '../../lib/scraper';
 
 export async function POST() {
   try {
-    // Initialize sources if not already done
-    const existing = getSources.all();
-    if (existing.length === 0) {
-      for (const source of initialSources) {
-        insertSource.run(source.id, source.category, source.name, source.url, source.notes || '', source.active);
-      }
+    // Upsert all sources from initialSources so new entries added to sources.ts
+    // are synced into the database on every setup call, not only on first init.
+    for (const source of initialSources) {
+      insertSource.run(source.id, source.category, source.name, source.url, source.notes || '', source.active);
     }
 
     // Fire scrape in background if not already running

@@ -66,6 +66,36 @@ export const initialSources: Source[] = [
   // ── Athletics ────────────────────────────────────────────────────────────
   { id: 45, category: "Athletics", name: "Fighting Illini Athletics",  url: "https://fightingillini.com/calendar.ashx/calendar.rss?sport_id=0&_=cmo6n3svw000235bepskusih0", notes: "All sports – Sidearm RSS feed", active: true },
   { id: 46, category: "Athletics", name: "Big Ten Athletics Calendar", url: "https://calendars.illinois.edu/list/6022",                                                       notes: "Big Ten affiliated events – UIUC calendar", active: true },
+
+  // ── Colleges & Schools (additional depts) ────────────────────────────────
+  { id: 51, category: "Colleges & Schools", name: "ECE – Electrical & Computer Engineering", url: "https://calendars.illinois.edu/list/172",  notes: "ECE dept events – UIUC calendar",         active: true },
+  { id: 52, category: "Colleges & Schools", name: "MechSE Master Calendar",                  url: "https://calendars.illinois.edu/list/3200", notes: "Mechanical Science & Engineering – UIUC calendar", active: true },
+  { id: 53, category: "Colleges & Schools", name: "Aerospace Engineering Seminars",          url: "https://calendars.illinois.edu/list/3087", notes: "AE dept seminars – UIUC calendar",        active: true },
+  { id: 54, category: "Colleges & Schools", name: "Department of Mathematics",               url: "https://calendars.illinois.edu/list/7421", notes: "Math dept master calendar – UIUC calendar", active: true },
+  { id: 55, category: "Colleges & Schools", name: "Illinois School of Architecture",         url: "https://calendars.illinois.edu/list/7118", notes: "Architecture lectures & events – UIUC calendar", active: true },
+  { id: 56, category: "Colleges & Schools", name: "Carle Illinois College of Medicine",      url: "https://calendars.illinois.edu/list/5988", notes: "Medical college events – UIUC calendar",  active: true },
+
+  // ── Arts & Performance (additional venues) ───────────────────────────────
+  { id: 57, category: "Arts & Performance", name: "Campus Performances (Aggregate)",         url: "https://calendars.illinois.edu/list/597",  notes: "Campus-wide performances aggregate – UIUC calendar", active: true },
+  { id: 58, category: "Arts & Performance", name: "Foellinger Auditorium Events",            url: "https://calendars.illinois.edu/list/128",  notes: "Major lecture hall & concert venue – UIUC calendar", active: true },
+  { id: 59, category: "Arts & Performance", name: "All Theater Events (Foellinger + Lincoln + Greg)", url: "https://calendars.illinois.edu/list/133", notes: "Aggregate of all campus theaters – UIUC calendar", active: true },
+
+  // ── Research Centers & Labs (additional) ─────────────────────────────────
+  { id: 60, category: "Research Centers & Labs", name: "Carl R. Woese Institute for Genomic Biology", url: "https://calendars.illinois.edu/list/1604", notes: "IGB events – UIUC calendar",             active: true },
+  { id: 61, category: "Research Centers & Labs", name: "Cancer Center Events",               url: "https://calendars.illinois.edu/list/3802", notes: "Carle Illinois Cancer Center – UIUC calendar", active: true },
+  { id: 62, category: "Research Centers & Labs", name: "SkAI Institute Events",              url: "https://calendars.illinois.edu/list/8221", notes: "AI/ML institute events – UIUC calendar",  active: true },
+  { id: 63, category: "Research Centers & Labs", name: "iSEE Sustainability Calendar",       url: "https://calendars.illinois.edu/list/6831", notes: "Institute for Sustainability, Energy & Environment – UIUC calendar", active: true },
+
+  // ── Design & Innovation (additional) ─────────────────────────────────────
+  { id: 64, category: "Design & Innovation", name: "Illinois Entrepreneurship Master Calendar", url: "https://calendars.illinois.edu/list/6327", notes: "Entrepreneurship events – UIUC calendar", active: true },
+
+  // ── Student Life & Cultural Centers (additional) ─────────────────────────
+  { id: 65, category: "Student Life & Cultural Centers", name: "Cultural & International Events (Aggregate)", url: "https://calendars.illinois.edu/list/596",  notes: "Campus-wide cultural & international events – UIUC calendar", active: true },
+  { id: 66, category: "Student Life & Cultural Centers", name: "MENA Cultural Center Events",                url: "https://calendars.illinois.edu/list/7612", notes: "Middle Eastern & North African Cultural Center – UIUC calendar", active: true },
+
+  // ── Graduate & Academic Support ───────────────────────────────────────────
+  { id: 67, category: "Graduate & Academic Support", name: "Graduate College Events",        url: "https://calendars.illinois.edu/list/3257", notes: "Events for graduate students & postdocs – UIUC calendar", active: true },
+  { id: 68, category: "Graduate & Academic Support", name: "Campus Speakers Series",         url: "https://calendars.illinois.edu/list/598",  notes: "Campus-wide speakers & lectures – UIUC calendar", active: true },
 ];
 
 export const CATEGORIES = [...new Set(initialSources.map(s => s.category))];
@@ -79,4 +109,5 @@ export const COLORS: Record<string, string> = {
   "Campus Recreation & Wellness":    "bg-teal-100 text-teal-800",
   "Student Life & Cultural Centers": "bg-red-100 text-red-800",
   "Athletics":                       "bg-indigo-100 text-indigo-800",
+  "Graduate & Academic Support":     "bg-cyan-100 text-cyan-800",
 };

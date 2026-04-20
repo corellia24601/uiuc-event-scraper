@@ -1,0 +1,938 @@
+https://calendars.illinois.edu/list/47         Library Calendar
+https://calendars.illinois.edu/list/45         Center for Global Studies
+https://calendars.illinois.edu/list/60         University Housing
+https://calendars.illinois.edu/list/97         MBA Club Room
+https://calendars.illinois.edu/list/81         Seminars of Interest
+https://calendars.illinois.edu/list/93         IEI and Campus Master
+https://calendars.illinois.edu/list/44         McKinley Health Center
+https://calendars.illinois.edu/list/108        UIUC All Campus Calendar
+https://calendars.illinois.edu/list/117        Beckman Institute Calendar (internal events only)
+https://calendars.illinois.edu/list/79         Materials Research Laboratory
+https://calendars.illinois.edu/list/62         Exhibits
+https://calendars.illinois.edu/list/7          General Events
+https://calendars.illinois.edu/list/271        Medieval Studies
+https://calendars.illinois.edu/list/210        SLAVIC Calendar
+https://calendars.illinois.edu/list/169        Department of Sociology
+https://calendars.illinois.edu/list/291        Chemical & Biomolecular Engineering - Seminars and Events
+https://calendars.illinois.edu/list/172        Department of Electrical and Computer Engineering
+https://calendars.illinois.edu/list/458        Chemistry - Physical Chemistry Seminars
+https://calendars.illinois.edu/list/556        International Programs Calendar
+https://calendars.illinois.edu/list/522        Chemistry - Analytical Chemistry Seminars
+https://calendars.illinois.edu/list/463        Chemistry - Chemical Biology Seminars
+https://calendars.illinois.edu/list/531        Bruce D. Nesbitt African American Cultural Center
+https://calendars.illinois.edu/list/484        Chemistry - Inorganic/Materials Chemistry Seminars
+https://calendars.illinois.edu/list/516        Career Services Council
+https://calendars.illinois.edu/list/513        Chemistry - Organic Chemistry Seminars
+https://calendars.illinois.edu/list/438        Business - PTMBA
+https://calendars.illinois.edu/list/468        Holidays
+https://calendars.illinois.edu/list/557        Academic Dates
+https://calendars.illinois.edu/list/442        Information Trust Institute (ITI) Calendar
+https://calendars.illinois.edu/list/417        Education Student Academic Affairs Office Complete Calendar
+https://calendars.illinois.edu/list/363        McKinley Health Center - Health Education
+https://calendars.illinois.edu/list/461        Listening opportunites on campus
+https://calendars.illinois.edu/list/594        Advising & Placement
+https://calendars.illinois.edu/list/603        Gender & Women's Studies
+https://calendars.illinois.edu/list/681        ACDIS: Arms Control & Domestic and International Security
+https://calendars.illinois.edu/list/705        College of Veterinary Medicine Public Calendar
+https://calendars.illinois.edu/list/601        MCB Event Calendar
+https://calendars.illinois.edu/list/637        Recreation, Health & Wellness
+https://calendars.illinois.edu/list/650        Astronomy Colloquium Speaker Calendar
+https://calendars.illinois.edu/list/598        Speakers
+https://calendars.illinois.edu/list/698        Russian, E. European & Eurasian Center: Speakers
+https://calendars.illinois.edu/list/711        Spurlock Museum - Master (SM Only)
+https://calendars.illinois.edu/list/704        Anthropology Department Calendar
+https://calendars.illinois.edu/list/616        Educational Psychology Calendar
+https://calendars.illinois.edu/list/628        Office of the Dean of Students
+https://calendars.illinois.edu/list/701        Astronomy Department Calendar
+https://calendars.illinois.edu/list/597        Performances
+https://calendars.illinois.edu/list/596        Cultural & International
+https://calendars.illinois.edu/list/732        Center for Global Studies: Events
+https://calendars.illinois.edu/list/863        Center for Latin American and Caribbean Studies (CLACS)
+https://calendars.illinois.edu/list/783        Housing
+https://calendars.illinois.edu/list/752        History Department Public Events
+https://calendars.illinois.edu/list/844        INHS Events
+https://calendars.illinois.edu/list/798        Human & Community Development
+https://calendars.illinois.edu/list/866        Center for the Study of Global Gender Equity
+https://calendars.illinois.edu/list/754        Office of Minority Student Affairs Calendar
+https://calendars.illinois.edu/list/840        Unit One DEV
+https://calendars.illinois.edu/list/826        Army ROTC
+https://calendars.illinois.edu/list/779        Center for South Asian and Middle Eastern Studies
+https://calendars.illinois.edu/list/782        Lesbian, Gay, Bisexual, & Transgender Ally Network
+https://calendars.illinois.edu/list/805        Unit One
+https://calendars.illinois.edu/list/852        Campus International Events
+https://calendars.illinois.edu/list/904        Center for East Asian & Pacific Studies
+https://calendars.illinois.edu/list/934        Biochemistry Department
+https://calendars.illinois.edu/list/892        Armenian Genocide Commemoration
+https://calendars.illinois.edu/list/901        Engineering Seminar
+https://calendars.illinois.edu/list/873        Turkish Minister's Visit
+https://calendars.illinois.edu/list/964        Neuroscience Program
+https://calendars.illinois.edu/list/893        Illinois Campus Calendar: Special Events event calendar
+https://calendars.illinois.edu/list/875        Russian, E. European & Eurasian Center: Co-sponsored Events
+https://calendars.illinois.edu/list/954        University Apartment Community Calendar
+https://calendars.illinois.edu/list/879        Department of Linguistics Calendar
+https://calendars.illinois.edu/list/935        School of Social Work Calendar
+https://calendars.illinois.edu/list/936        Cell and Developmental Biology (CDB) Department
+https://calendars.illinois.edu/list/891        Business - All Events
+https://calendars.illinois.edu/list/953        GPO College of Engineering
+https://calendars.illinois.edu/list/937        Microbiology Department
+https://calendars.illinois.edu/list/938        Molecular and Integrative Physiology (MIP) Department
+https://calendars.illinois.edu/list/949        Secretariat
+https://calendars.illinois.edu/list/878        College of Fine and Applied Arts
+https://calendars.illinois.edu/list/926        Academic
+https://calendars.illinois.edu/list/958        Maggie's Day Planner
+https://calendars.illinois.edu/list/945        Dancing Illini
+https://calendars.illinois.edu/list/874        Indonesian Students Club
+https://calendars.illinois.edu/list/903        Provost's Test
+https://calendars.illinois.edu/list/975        Cell and Developmental Biology (CDB) Student & Postdoc Seminars
+https://calendars.illinois.edu/list/971        Molecular and Integrative Physiology (MIP) Department Seminar Series
+https://calendars.illinois.edu/list/984        Biochemistry Department Graduate Seminars
+https://calendars.illinois.edu/list/1002       Siebel School Corporate
+https://calendars.illinois.edu/list/974        Cell and Developmental Biology (CDB) Departmental Seminars
+https://calendars.illinois.edu/list/1064       Entrepreneurship Portal
+https://calendars.illinois.edu/list/1006       MCB Seminars-School of Molecular and Cellular Biology Seminars
+https://calendars.illinois.edu/list/976        TEC Calendar
+https://calendars.illinois.edu/list/991        Biochemistry Department Journal Club
+https://calendars.illinois.edu/list/983        Biochemistry Department Seminars
+https://calendars.illinois.edu/list/973        MCB-MCB Undergraduate Program
+https://calendars.illinois.edu/list/1103       Business - Department of Business Administration
+https://calendars.illinois.edu/list/1041       Siebel School Information Panels Calendar
+https://calendars.illinois.edu/list/980        UI Ice Arena
+https://calendars.illinois.edu/list/1027       Asian American Cultural Center
+https://calendars.illinois.edu/list/1102       College of Media Events Calendar
+https://calendars.illinois.edu/list/1093       May's Stuffs To Doos
+https://calendars.illinois.edu/list/990        NPRE Events Calendar
+https://calendars.illinois.edu/list/1063       Teaching and Learning with Technology (TLT)
+https://calendars.illinois.edu/list/1062       CITES Academic Technology Services
+https://calendars.illinois.edu/list/1169       European Union Center Events
+https://calendars.illinois.edu/list/1207       Campus Political Activities courtesy of the Intercollegiate Studies Institute
+https://calendars.illinois.edu/list/1134       Pathobiology Calendar
+https://calendars.illinois.edu/list/1105       Americans for Informed Democracy
+https://calendars.illinois.edu/list/1163       Business - Study Abroad Incoming
+https://calendars.illinois.edu/list/1165       Nano Seminars
+https://calendars.illinois.edu/list/1204       University Housing
+https://calendars.illinois.edu/list/1127       Asian American Cultural Center - Campus and Community Calendar
+https://calendars.illinois.edu/list/1213       International Programs and Studies
+https://calendars.illinois.edu/list/1137       Parents Programs Calendar
+https://calendars.illinois.edu/list/1233       School of Molecular & Cellular Biology Calendar of Events
+https://calendars.illinois.edu/list/1209       40 North
+https://calendars.illinois.edu/list/1171       Pompilia
+https://calendars.illinois.edu/list/1372       Armenian Association
+https://calendars.illinois.edu/list/1329       ISSS Workshops
+https://calendars.illinois.edu/list/1354       Study Abroad Deadlines & Info Sessions
+https://calendars.illinois.edu/list/1387       AHS Calendar (External)
+https://calendars.illinois.edu/list/1374       Materials Science and Engineering Calendar
+https://calendars.illinois.edu/list/1390       Business - MS Finance
+https://calendars.illinois.edu/list/1381       Department of Chemistry Master Calendar
+https://calendars.illinois.edu/list/1297       UIUC Biophysics and Related Seminars
+https://calendars.illinois.edu/list/1383       UIF Master Calendar
+https://calendars.illinois.edu/list/1249       College of LAS Events
+https://calendars.illinois.edu/list/1435       NCSA Events &#8211; NCSA | National Center for Supercomputing Applications
+https://calendars.illinois.edu/list/1449       A+D Faculty events
+https://calendars.illinois.edu/list/1439       Department of Statistics Event Calendar
+https://calendars.illinois.edu/list/1407       Calendario de Mauricio M. Perillo
+https://calendars.illinois.edu/list/1447       A+D Student events
+https://calendars.illinois.edu/list/1404       PS-Major Events
+https://calendars.illinois.edu/list/1452       Multicultural Advocates Master Calendar
+https://calendars.illinois.edu/list/1450       The School of Art and Design - Faculty Calendar
+https://calendars.illinois.edu/list/1432       Center for Innovation in Teaching & Learning
+https://calendars.illinois.edu/list/1534       Native American House
+https://calendars.illinois.edu/list/1535       American Indian Studies Program
+https://calendars.illinois.edu/list/1542       Business-Study Abroad
+https://calendars.illinois.edu/list/1540       Veterinary Medicine Alumni & Advancement
+https://calendars.illinois.edu/list/1533       American Indian Studies Program
+https://calendars.illinois.edu/list/1546       Main Library Exhibits Calendar
+https://calendars.illinois.edu/list/1578       SLAVIC Films and Conversation Tables
+https://calendars.illinois.edu/list/1667       Geology at Illinois
+https://calendars.illinois.edu/list/1551       HireIllini Career Fairs
+https://calendars.illinois.edu/list/1643       Illinois Sustainable Technology Center Events
+https://calendars.illinois.edu/list/1710       University of Illinois Press Events Calendar
+https://calendars.illinois.edu/list/1604       Carl R. Woese Institute for Genomic Biology
+https://calendars.illinois.edu/list/1595       All calendars
+https://calendars.illinois.edu/list/1702       Political Science
+https://calendars.illinois.edu/list/1621       College of Applied Health Sciences
+https://calendars.illinois.edu/list/1656       CBSU
+https://calendars.illinois.edu/list/1723       Business Student-to-Student
+https://calendars.illinois.edu/list/1570       UIUC Events
+https://calendars.illinois.edu/list/1569       Ming's List
+https://calendars.illinois.edu/list/1808       Department of French
+https://calendars.illinois.edu/list/1761       Transportation Group
+https://calendars.illinois.edu/list/1861       Test Calendar 2
+https://calendars.illinois.edu/list/1875       Scholarships Office Master Calendar
+https://calendars.illinois.edu/list/1831       Test Calendar 1
+https://calendars.illinois.edu/list/1880       Study Abroad Events & Deadlines
+https://calendars.illinois.edu/list/1826       Scholarship Events and Deadlines
+https://calendars.illinois.edu/list/1771       Student Affairs Calendar
+https://calendars.illinois.edu/list/1963       Physics - Mathematical and Theoretical Physics Seminar
+https://calendars.illinois.edu/list/1958       IQUIST Seminar Series
+https://calendars.illinois.edu/list/1962       Physics - Astrophysics, Relativity, and Cosmology Seminar
+https://calendars.illinois.edu/list/1954       Physics - The Anthony J Leggett Institute for Condensed Matter Theory Seminar
+https://calendars.illinois.edu/list/1996       CWS Calendar
+https://calendars.illinois.edu/list/1940       Department of French and Italian (EVENTS)
+https://calendars.illinois.edu/list/1953       Physics - Colloquium
+https://calendars.illinois.edu/list/1961       Physics - Biological Physics / iPoLS / STC-QCB Seminar
+https://calendars.illinois.edu/list/1964       Physics - Condensed Matter Seminar
+https://calendars.illinois.edu/list/1994       Michelle's Schedule
+https://calendars.illinois.edu/list/1889       European Union Center
+https://calendars.illinois.edu/list/2004       Physics - CPLC Calendar
+https://calendars.illinois.edu/list/1965       Physics - Graduate Office Calendar
+https://calendars.illinois.edu/list/1887       Beckman Master Calendar Test
+https://calendars.illinois.edu/list/1943       Department of Economics Calendar
+https://calendars.illinois.edu/list/2039       Health/Wellness Calendar
+https://calendars.illinois.edu/list/1968       Physics Main Calendar
+https://calendars.illinois.edu/list/1905       College of LAS: For Faculty & Staff
+https://calendars.illinois.edu/list/1902       College of LAS: For Students
+https://calendars.illinois.edu/list/2069       Neuroscience Program Seminars
+https://calendars.illinois.edu/list/2074       Campus Wellbeing Services - All Wellness Events
+https://calendars.illinois.edu/list/2054       Physics - Astronomy Calendar
+https://calendars.illinois.edu/list/2059       IGB Kiosk
+https://calendars.illinois.edu/list/2091       ICMT
+https://calendars.illinois.edu/list/2057       SLAVIC Web calendar
+https://calendars.illinois.edu/list/2150       amymastercal
+https://calendars.illinois.edu/list/2106       Seminars of Interest - School of Chemical Sciences for Digital Signage
+https://calendars.illinois.edu/list/2169       Rare Book & Manuscript Library Events
+https://calendars.illinois.edu/list/2045       Fall 08
+https://calendars.illinois.edu/list/2112       Events of Interest to Global Studies Majors
+https://calendars.illinois.edu/list/2209       Chemistry - Public Events
+https://calendars.illinois.edu/list/2235       CSL Decision and Control Group
+https://calendars.illinois.edu/list/2274       Technology Entrepreneur Center - Compele
+https://calendars.illinois.edu/list/2238       Parallel@Illinois Calendar
+https://calendars.illinois.edu/list/2292       Identify Illinois Master Calendar
+https://calendars.illinois.edu/list/2253       Grainger Engineering: Special Events Calendar
+https://calendars.illinois.edu/list/2279       throw master calendar
+https://calendars.illinois.edu/list/2195       Prairie Research Institute - All Events
+https://calendars.illinois.edu/list/2277       CEE - Railroad
+https://calendars.illinois.edu/list/2232       CSL Master Calendar
+https://calendars.illinois.edu/list/2231       STUDENT CALENDAR
+https://calendars.illinois.edu/list/2226       E T Forum Events Calendar
+https://calendars.illinois.edu/list/2366       CSAMES
+https://calendars.illinois.edu/list/2345       Women's Resources Center
+https://calendars.illinois.edu/list/2463       Gender & Sexuality Resource Center
+https://calendars.illinois.edu/list/2467       ChoLLie
+https://calendars.illinois.edu/list/2617       Department of Linguistics Events (NO LONGER IN USE)
+https://calendars.illinois.edu/list/2570       Native American House
+https://calendars.illinois.edu/list/2607       Astro
+https://calendars.illinois.edu/list/2658       School of Social Work Event Calendar
+https://calendars.illinois.edu/list/2622       Illinois ECE Calendar
+https://calendars.illinois.edu/list/2508       Pre-Law Advising Services Calendar
+https://calendars.illinois.edu/list/2567       TCC411
+https://calendars.illinois.edu/list/2613       Asian American Studies
+https://calendars.illinois.edu/list/2628       Campus Recreation - Master Calendar
+https://calendars.illinois.edu/list/2568       Grainger College of Engineering, All Events
+https://calendars.illinois.edu/list/2654       Siebel School Master Calendar
+https://calendars.illinois.edu/list/2735       Physics - Departmental Events
+https://calendars.illinois.edu/list/2674       College of Media Events
+https://calendars.illinois.edu/list/2678       Middle East Events
+https://calendars.illinois.edu/list/2751       School of Chemical Sciences Seminars of Interest - event calendar
+https://calendars.illinois.edu/list/2667       Psychology Master Calendar
+https://calendars.illinois.edu/list/2719       Center for African Studies Calendar
+https://calendars.illinois.edu/list/2758       Slavic Events
+https://calendars.illinois.edu/list/2666       Psychology General Calendar
+https://calendars.illinois.edu/list/2750       REEEC Master Calendar
+https://calendars.illinois.edu/list/2677       Civil and Environmental Engineering - Master Calendar
+https://calendars.illinois.edu/list/2771       College of Education Public Events (MASTER)
+https://calendars.illinois.edu/list/2772       College of Education Events
+https://calendars.illinois.edu/list/2770       Vet Med Event Calendar
+https://calendars.illinois.edu/list/2769       Asian American Cultural Center Events
+https://calendars.illinois.edu/list/2728       Prof. P. A. Shapley
+https://calendars.illinois.edu/list/2808       NRES Events
+https://calendars.illinois.edu/list/2889       Campus General Request Event
+https://calendars.illinois.edu/list/2885       Illinois International Events
+https://calendars.illinois.edu/list/2844       Russian, E. European & Eurasian Center: Receptions
+https://calendars.illinois.edu/list/2791       MechSE Seminars
+https://calendars.illinois.edu/list/2859       Fine and Applied Arts: Admissions Events
+https://calendars.illinois.edu/list/2845       Spurlock Museum - Event
+https://calendars.illinois.edu/list/2856       Latina/Latino Studies Event Calendar
+https://calendars.illinois.edu/list/2952       Modern Greek Studies
+https://calendars.illinois.edu/list/2927       Chemistry - Alumni Events
+https://calendars.illinois.edu/list/2792       McKinley Health Center COE
+https://calendars.illinois.edu/list/2835       Siebel School Events Calendar
+https://calendars.illinois.edu/list/2923       Brittany's Calendar
+https://calendars.illinois.edu/list/2924       Ice Arena Calendar
+https://calendars.illinois.edu/list/2812       VBB Calendar of Events
+https://calendars.illinois.edu/list/2935       09-10 UIUC
+https://calendars.illinois.edu/list/3059       Anna's Calendar
+https://calendars.illinois.edu/list/3114       La Casa Cultural Latina
+https://calendars.illinois.edu/list/3087       Aerospace Engineering Seminars
+https://calendars.illinois.edu/list/3029       REEEC FB Calendar
+https://calendars.illinois.edu/list/3052       ACES Office of International Programs
+https://calendars.illinois.edu/list/3054       SCS - Major Named Lectures and Symposia
+https://calendars.illinois.edu/list/3017       Employee Relations and Human Resources
+https://calendars.illinois.edu/list/3094       Asian American Studies
+https://calendars.illinois.edu/list/3058       National Resource Centers
+https://calendars.illinois.edu/list/3079       UIUC
+https://calendars.illinois.edu/list/3051       HMNTL Master Calendar
+https://calendars.illinois.edu/list/2995       Grainger College of Engineering Seminars & Speakers
+https://calendars.illinois.edu/list/3142       Spanish and Portuguese Calendar
+https://calendars.illinois.edu/list/3162       NPRE Events
+https://calendars.illinois.edu/list/3207       Master Calendar of Events
+https://calendars.illinois.edu/list/3135       Hispanic Outreach Office, University of Illinois Extension Eventos en Espaol
+https://calendars.illinois.edu/list/3186       SLCL Master Calendar of Events (all SLCL unit calendars)
+https://calendars.illinois.edu/list/3133       Engineering Seminars Test Calendar 2.10
+https://calendars.illinois.edu/list/3259       Graduate College Thesis Deadlines
+https://calendars.illinois.edu/list/3374       Ekkawit Ray Pongpet
+https://calendars.illinois.edu/list/3252       IT Excellence at Illinois: Calendar
+https://calendars.illinois.edu/list/3289       Russian, E. European & Eurasian Center: Outreach
+https://calendars.illinois.edu/list/3257       Graduate College Events for Graduate Students & Postdocs
+https://calendars.illinois.edu/list/3322       Diversity & Social Justice Education
+https://calendars.illinois.edu/list/3303       Financial Engineering, M.S.
+https://calendars.illinois.edu/list/3367       Graduate Student Events
+https://calendars.illinois.edu/list/3371       Student Affairs & Campus Events
+https://calendars.illinois.edu/list/3415       Illinois Network on Islam and Muslim Societies
+https://calendars.illinois.edu/list/3530       Medieval Studies
+https://calendars.illinois.edu/list/3491       CliMAS Colloquia
+https://calendars.illinois.edu/list/3590       DURP master
+https://calendars.illinois.edu/list/3552       OCE Calendar
+https://calendars.illinois.edu/list/3465       Entrepreneurship Calendar
+https://calendars.illinois.edu/list/3580       Lit Lang Library
+https://calendars.illinois.edu/list/3462       Research Park Events
+https://calendars.illinois.edu/list/3479       "FAA Online" Calendar
+https://calendars.illinois.edu/list/3467       Uni High Weekly Memo | University Laboratory High School
+https://calendars.illinois.edu/list/3706       ILC Certificate
+https://calendars.illinois.edu/list/3671       ILC Leadership Labs
+https://calendars.illinois.edu/list/3708       ILC General Events
+https://calendars.illinois.edu/list/3709       ILC Master Calendar
+https://calendars.illinois.edu/list/3724       Department of the Classics
+https://calendars.illinois.edu/list/3695       Graduate College Events
+https://calendars.illinois.edu/list/3641       AHS Alumni Calendar
+https://calendars.illinois.edu/list/3611       Housing Operational Calendar
+https://calendars.illinois.edu/list/3710       xsede
+https://calendars.illinois.edu/list/3605       ISE Seminar Calendar
+https://calendars.illinois.edu/list/3721       Bioengineering calendar
+https://calendars.illinois.edu/list/3694       Visual Resources Center at the College of Fine and Applied Arts
+https://calendars.illinois.edu/list/3604       Industrial & Enterprise Systems Engineering Calendar
+https://calendars.illinois.edu/list/3715       International Student and Scholar Services
+https://calendars.illinois.edu/list/3596       farmdoc daily Publication Schedule
+https://calendars.illinois.edu/list/3881       NAH Test
+https://calendars.illinois.edu/list/3732       Prairie Research Institute - Events
+https://calendars.illinois.edu/list/3824       The Program in Translation & Interpreting Studies
+https://calendars.illinois.edu/list/3726       EALC Calendar of Events
+https://calendars.illinois.edu/list/3802       Cancer Center Events
+https://calendars.illinois.edu/list/3831       IACAT Redesign
+https://calendars.illinois.edu/list/3880       NAH Master Calendar
+https://calendars.illinois.edu/list/3777       Reservations 3427 ETMSW
+https://calendars.illinois.edu/list/3781       tim's calendar
+https://calendars.illinois.edu/list/3823       ROTC Tri-Service
+https://calendars.illinois.edu/list/3731       MechSE Master Calendar
+https://calendars.illinois.edu/list/3778       Reservations 3312 ETMSW
+https://calendars.illinois.edu/list/3832       Illinois
+https://calendars.illinois.edu/list/3875       VRC Snippet
+https://calendars.illinois.edu/list/3740       Morrill Hall Display Calendar
+https://calendars.illinois.edu/list/3750       Room Reservations in the College of Education, all rooms
+https://calendars.illinois.edu/list/3812       Michael Vila's calendar for event attendance planning.
+https://calendars.illinois.edu/list/4014       Physics - Careers Seminar
+https://calendars.illinois.edu/list/3952       Cancer Center Master Calendar
+https://calendars.illinois.edu/list/3985       Student Money Management Center Master Calendar
+https://calendars.illinois.edu/list/3931       CEAPS Events Calendar
+https://calendars.illinois.edu/list/3946       Illinois ECE Seminars
+https://calendars.illinois.edu/list/4035       NPRE seminars
+https://calendars.illinois.edu/list/4084       Chemistry - Chemical Biology & CBI Seminars
+https://calendars.illinois.edu/list/4082       International and Area Studies Library
+https://calendars.illinois.edu/list/4098       University of Illinois Press Events Master Calendar
+https://calendars.illinois.edu/list/4124       all
+https://calendars.illinois.edu/list/4024       Geography & Geographic Information Science (GGIS)
+https://calendars.illinois.edu/list/4109       PEEC Seminars
+https://calendars.illinois.edu/list/4061       Illini Union Courtyard Cafe Events Calendar
+https://calendars.illinois.edu/list/4080       Seminars
+https://calendars.illinois.edu/list/4083       INTLconnect.illinois.edu Calendar of Events
+https://calendars.illinois.edu/list/4063       Illini Union (All) Events Calendar
+https://calendars.illinois.edu/list/4092       Library Calendar
+https://calendars.illinois.edu/list/4116       Illini Sports Calendar
+https://calendars.illinois.edu/list/4095       Research Park Master Calendar
+https://calendars.illinois.edu/list/4118       Bio Seminars
+https://calendars.illinois.edu/list/4193       ISSS Programs & Trainings
+https://calendars.illinois.edu/list/4255       Geography & Geographic Information Science
+https://calendars.illinois.edu/list/4181       Woochul-Calendar
+https://calendars.illinois.edu/list/4146       Master Calendar1
+https://calendars.illinois.edu/list/4129       Urbana-Champaign Calendar
+https://calendars.illinois.edu/list/4180       Registrar - Academic Records Unit
+https://calendars.illinois.edu/list/4225       ARTCA Fellowship Calendar
+https://calendars.illinois.edu/list/4178       Registrar - Degree Cert & Study Abroad Unit
+https://calendars.illinois.edu/list/4175       Office of the Registrar Master Calendar
+https://calendars.illinois.edu/list/4293       Go Global
+https://calendars.illinois.edu/list/4308       DRC Test Cal
+https://calendars.illinois.edu/list/4279       CSGGE Master Calendar
+https://calendars.illinois.edu/list/4314       Gender Equity Council
+https://calendars.illinois.edu/list/4342       Department of Aerospace Engineering Events
+https://calendars.illinois.edu/list/4290       David's Calendar
+https://calendars.illinois.edu/list/4286       iFoundry Master Calendar
+https://calendars.illinois.edu/list/4327       Engineering Online Events
+https://calendars.illinois.edu/list/4309       WebStore Training 2012
+https://calendars.illinois.edu/list/4336       Psychological Services Center Master Calendar
+https://calendars.illinois.edu/list/4317       eDream partners
+https://calendars.illinois.edu/list/4328       Engineering Online Master Calendar
+https://calendars.illinois.edu/list/4338       Department of Aerospace Engineering
+https://calendars.illinois.edu/list/4339       Engineering IT Calendar
+https://calendars.illinois.edu/list/4284       Daryl testing
+https://calendars.illinois.edu/list/4442       ADSC Master Calendar
+https://calendars.illinois.edu/list/4478       SoM Academic Calendar
+https://calendars.illinois.edu/list/4469       Center for Biophysics and Quantitative Biology
+https://calendars.illinois.edu/list/4406       IAS Library Suggests!
+https://calendars.illinois.edu/list/4543       Morrill Engineering Program (MEP)
+https://calendars.illinois.edu/list/4512       Anthropology
+https://calendars.illinois.edu/list/4511       Computational Science and Engineering (CSE) Master Calendar
+https://calendars.illinois.edu/list/4595       Beckman Institute Calendar (Master)
+https://calendars.illinois.edu/list/4597       Daehyuk's Seminars
+https://calendars.illinois.edu/list/4579       Ethnography of the University Initiative
+https://calendars.illinois.edu/list/4584       DH @ Illinois
+https://calendars.illinois.edu/list/4650       Astronomy Colloquium Speaker Calendar
+https://calendars.illinois.edu/list/4673       Business - All Events
+https://calendars.illinois.edu/list/4798       Illinois ECE Saturday Engineering for Everyone
+https://calendars.illinois.edu/list/4729       Financial Wellness for College Students Program- Master Calendar
+https://calendars.illinois.edu/list/4639       HRI
+https://calendars.illinois.edu/list/4741       SMMC Online Events - All Campuses
+https://calendars.illinois.edu/list/4705       Department of Philosophy Events
+https://calendars.illinois.edu/list/4680       Chicago Events - Internal + External
+https://calendars.illinois.edu/list/4756       Urbana campus events in the Chicago area
+https://calendars.illinois.edu/list/4698       CREDIT Community Events
+https://calendars.illinois.edu/list/4704       Viola's 2013 Fall Calendar
+https://calendars.illinois.edu/list/4662       Counseling Center Events
+https://calendars.illinois.edu/list/4661       Counseling Center
+https://calendars.illinois.edu/list/4813       HireIllini
+https://calendars.illinois.edu/list/4757       Urbana Campus Research Calendar (OVCRI)
+https://calendars.illinois.edu/list/4891       Campus Safety Commission Coordinating Calendar
+https://calendars.illinois.edu/list/4814       College of Veterinary Medicine Internal Calendar
+https://calendars.illinois.edu/list/4900       Facilties & Services Events
+https://calendars.illinois.edu/list/4843       Applied Micro Research Lunch
+https://calendars.illinois.edu/list/4862       Department of Economics-Master Calendar
+https://calendars.illinois.edu/list/4888       Master Calendar - Test
+https://calendars.illinois.edu/list/4863       BW Users at UoI
+https://calendars.illinois.edu/list/4918       Hemiao
+https://calendars.illinois.edu/list/4951       calendar
+https://calendars.illinois.edu/list/4956       Campus Honors Program
+https://calendars.illinois.edu/list/4922       TEC Master Calendar
+https://calendars.illinois.edu/list/4964       Classroom Technology Events
+https://calendars.illinois.edu/list/4957       CHP Events
+https://calendars.illinois.edu/list/4989       College of Media Department of Advertising Events
+https://calendars.illinois.edu/list/4958       HSC Events
+https://calendars.illinois.edu/list/4948       Integrative Biology - Undergraduate Master
+https://calendars.illinois.edu/list/4971       Welcome for Undergraduate Students
+https://calendars.illinois.edu/list/4980       OVCR Working Groups Calendar
+https://calendars.illinois.edu/list/5003       Office of Student Financial Aid
+https://calendars.illinois.edu/list/5060       German - Undergraduate Advising
+https://calendars.illinois.edu/list/5040       Financial Literacy Badges Program Calendar
+https://calendars.illinois.edu/list/5001       NCSA Research and Education &#8211; NCSA | National Center for Supercomputing Applications
+https://calendars.illinois.edu/list/5037       Sample Master Calendar
+https://calendars.illinois.edu/list/5068       Physics - High Energy Physics Seminar
+https://calendars.illinois.edu/list/5093       Campus Humanities Calendar
+https://calendars.illinois.edu/list/5090       Engineering Events
+https://calendars.illinois.edu/list/5046       LCTL Master Calendar
+https://calendars.illinois.edu/list/5081       Graduate Program Recruiting Events
+https://calendars.illinois.edu/list/5064       Center for Innovation in Teaching & Learning
+https://calendars.illinois.edu/list/5155       Germanic Events
+https://calendars.illinois.edu/list/5249       Events sponsored by the Center for Language Instruction and Coordination
+https://calendars.illinois.edu/list/5129       Arabic Studies Program Event Calendar
+https://calendars.illinois.edu/list/5138       IL Homepage – Test
+https://calendars.illinois.edu/list/5229       Physics - Astrotheory
+https://calendars.illinois.edu/list/5214       Microbiology at Illinois
+https://calendars.illinois.edu/list/5259       Integrative Biology
+https://calendars.illinois.edu/list/5223       Chemical & Biomolecular Engineering - Events of Interest
+https://calendars.illinois.edu/list/5128       Arabic Studies Program Master Calendar
+https://calendars.illinois.edu/list/5115       Research Park Master
+https://calendars.illinois.edu/list/5334       Office of Community College Research and Leadership
+https://calendars.illinois.edu/list/5260       Evolution, Ecology, and Behavior - Events
+https://calendars.illinois.edu/list/5261       Entomology - Events
+https://calendars.illinois.edu/list/5380       Test Events
+https://calendars.illinois.edu/list/5376       Online Illinois Events
+https://calendars.illinois.edu/list/5328       Chemistry Community Outreach Events
+https://calendars.illinois.edu/list/5330       Office of the CIO Master Calendar
+https://calendars.illinois.edu/list/5285       Lemann Center for Brazilian Studies
+https://calendars.illinois.edu/list/5323       AITG Master Calendar
+https://calendars.illinois.edu/list/5352       College of Media Events
+https://calendars.illinois.edu/list/5262       Plant Biology - Events
+https://calendars.illinois.edu/list/5375       Online Illinois Calendar
+https://calendars.illinois.edu/list/5344       C.O.R.E. Master Calendar
+https://calendars.illinois.edu/list/5453       Calendar
+https://calendars.illinois.edu/list/5458       Resource Calendar Example
+https://calendars.illinois.edu/list/5528       Illinois ECE Distinguished Colloquium Series
+https://calendars.illinois.edu/list/5447       Impact on Science Education
+https://calendars.illinois.edu/list/5411       Rhetoric Program
+https://calendars.illinois.edu/list/5442       Writers Workshop General Events
+https://calendars.illinois.edu/list/5515       Illinois Human Resources Main Calendar
+https://calendars.illinois.edu/list/5460       UIC Perinatal Center Courses and Conferences
+https://calendars.illinois.edu/list/5510       International and Area Studies Library - Campus Events
+https://calendars.illinois.edu/list/5471       UIUC Workshop and Event Calendar
+https://calendars.illinois.edu/list/5579       ABCs of School Nutrition
+https://calendars.illinois.edu/list/5614       Center for African Studies Events
+https://calendars.illinois.edu/list/5589       Mayo Clinic & Illinois Alliance for Technology-Based Healthcare
+https://calendars.illinois.edu/list/5578       CEE Seminars and Conferences
+https://calendars.illinois.edu/list/5608       Water Resources Engineering and Science Seminars
+https://calendars.illinois.edu/list/5598       Siebel School Speakers Calendar
+https://calendars.illinois.edu/list/5529       Illinois ECE Explorations
+https://calendars.illinois.edu/list/5599       Siebel School Undergraduate Calendar
+https://calendars.illinois.edu/list/5610       Siebel School Graduate Calendar
+https://calendars.illinois.edu/list/5587       RailTEC
+https://calendars.illinois.edu/list/5577       OBFS Test Calendar
+https://calendars.illinois.edu/list/5543       Microbiology@Illinois
+https://calendars.illinois.edu/list/5576       Social and Behavioral Sciences Master Calendar
+https://calendars.illinois.edu/list/5571       Chemical & Biomolecular Engineering - Undergraduate Events of Interest
+https://calendars.illinois.edu/list/5651       Illinois Student Government Events Calendar
+https://calendars.illinois.edu/list/5715       College of Law - Alumni Calendar
+https://calendars.illinois.edu/list/5710       Wounded Veterans Center Events Calendar
+https://calendars.illinois.edu/list/5747       Life of the Department
+https://calendars.illinois.edu/list/5714       College of Law - Events Calendar
+https://calendars.illinois.edu/list/5748       Bookstore Calendar for November
+https://calendars.illinois.edu/list/5724       Graduate College Thesis Master
+https://calendars.illinois.edu/list/5670       Siebel School Graduate Master Calendar
+https://calendars.illinois.edu/list/5706       S51 Test Calendar
+https://calendars.illinois.edu/list/5677       Test Calendar
+https://calendars.illinois.edu/list/5758       Life of the Mind
+https://calendars.illinois.edu/list/5756       College of Law - All Other Events Calendar
+https://calendars.illinois.edu/list/5705       Physics - String Theory
+https://calendars.illinois.edu/list/5691       farmdoc Webinars Schedule
+https://calendars.illinois.edu/list/5763       FAA Master Events Calendar
+https://calendars.illinois.edu/list/5689       The Jeffries Center Events Calendar
+https://calendars.illinois.edu/list/5704       Events of the Week
+https://calendars.illinois.edu/list/5676       Siebel School Undergraduate Master Calendar
+https://calendars.illinois.edu/list/5749       Illinois Events
+https://calendars.illinois.edu/list/5699       Economics Event & Workshop Calendar (UG/MSPE View)
+https://calendars.illinois.edu/list/5768       BER
+https://calendars.illinois.edu/list/5811       Crop Sciences - Research Centers
+https://calendars.illinois.edu/list/5803       University Ethics and Compliance Office Calendar
+https://calendars.illinois.edu/list/5801       NetMath Calendar
+https://calendars.illinois.edu/list/5788       Training test
+https://calendars.illinois.edu/list/5784       Agricultural, Consumer and Environmental Sciences (ACES)
+https://calendars.illinois.edu/list/5795       CPSC Calendar
+https://calendars.illinois.edu/list/5847       Technology Events
+https://calendars.illinois.edu/list/5890       Learn to Hunt - Workshops
+https://calendars.illinois.edu/list/5844       ACES - Calendar of Technology Related Events
+https://calendars.illinois.edu/list/5912       Employee Learning & Organizational Effectiveness
+https://calendars.illinois.edu/list/5913       Illinois Mathematics Lab
+https://calendars.illinois.edu/list/5872       Other Sustainability Events
+https://calendars.illinois.edu/list/5845       ACES - Master Calendar of Technology Events
+https://calendars.illinois.edu/list/5956       Training Calendar
+https://calendars.illinois.edu/list/5925       Jewish Culture and Society
+https://calendars.illinois.edu/list/5976       las_saao_portal_content
+https://calendars.illinois.edu/list/5926       EHHE Student Activities
+https://calendars.illinois.edu/list/5960       UG Co-Director Duties
+https://calendars.illinois.edu/list/5951       SDG Dev Calendar
+https://calendars.illinois.edu/list/5949       Physics - Biological Physics / iPoLS / STC-QCB Seminar
+https://calendars.illinois.edu/list/5938       ITPF Calendar
+https://calendars.illinois.edu/list/5988       Carle Illinois College of Medicine All Events
+https://calendars.illinois.edu/list/5958       Volunteer Opportunities
+https://calendars.illinois.edu/list/6019       International Safety and Security Events
+https://calendars.illinois.edu/list/6002       myIllini LAS Content
+https://calendars.illinois.edu/list/6025       ISE Corporate Visits
+https://calendars.illinois.edu/list/6071       Moms Weekend 2018 Events
+https://calendars.illinois.edu/list/6096       MatSE Soft Materials Seminar Calendar
+https://calendars.illinois.edu/list/6094       MatSE Colloquium Calendar
+https://calendars.illinois.edu/list/6095       MatSE Special Seminar Calendar
+https://calendars.illinois.edu/list/6091       Reservations 3015 ETMSW, Dissertation Defense Room
+https://calendars.illinois.edu/list/6084       Grainger Engineering Library Information Center
+https://calendars.illinois.edu/list/6093       MRSEC Events
+https://calendars.illinois.edu/list/6097       MatSE Hard Materials Seminar Calendar
+https://calendars.illinois.edu/list/6078       Sponsored Programs Administration
+https://calendars.illinois.edu/list/6040       Test Calendar
+https://calendars.illinois.edu/list/6062       LAS Global Studies Master Calendar
+https://calendars.illinois.edu/list/6003       Research Technology Master Calendar
+https://calendars.illinois.edu/list/6104       Calendarsad
+https://calendars.illinois.edu/list/6142       Conferences and Symposiums (SEMINARS)
+https://calendars.illinois.edu/list/6145       Economics Express Advising (UNDERGRAD)
+https://calendars.illinois.edu/list/6138       Macroeconomics (SEMINARS)
+https://calendars.illinois.edu/list/6121       Illinois State Archaeological Survey Calendar
+https://calendars.illinois.edu/list/6143       Applied Micro Research Lunch (SEMINARS)
+https://calendars.illinois.edu/list/6144       Economics Seminars (SEMINARS MASTER)
+https://calendars.illinois.edu/list/6125       Applied Microeconomics (SEMINARS)
+https://calendars.illinois.edu/list/6139       Microeconomics (SEMINARS)
+https://calendars.illinois.edu/list/6137       Econometrics (SEMINARS)
+https://calendars.illinois.edu/list/6155       MRSEC Master Calendar
+https://calendars.illinois.edu/list/6109       MatSE Master Calendar for Seminars
+https://calendars.illinois.edu/list/6184       Calendar
+https://calendars.illinois.edu/list/6191       INHS Events
+https://calendars.illinois.edu/list/6200       Calendar UIF
+https://calendars.illinois.edu/list/6214       Econ Career Events
+https://calendars.illinois.edu/list/6215       Econ Career Express Advising Calendar
+https://calendars.illinois.edu/list/6199       NRES Field Trip Calendar
+https://calendars.illinois.edu/list/6219       Dan's Test Calendar
+https://calendars.illinois.edu/list/6174       SourceLab
+https://calendars.illinois.edu/list/6197       Applied Research Master Calendar
+https://calendars.illinois.edu/list/6194       Test - DCR | Illinois
+https://calendars.illinois.edu/list/6229       ISTC Calendar
+https://calendars.illinois.edu/list/6178       OUR - Symposium calendar
+https://calendars.illinois.edu/list/6175       OUR - Master Calendar
+https://calendars.illinois.edu/list/6242       Bike at Illinois Events
+https://calendars.illinois.edu/list/6277       LAS 291 Fall 18 Assignment Due Dates
+https://calendars.illinois.edu/list/6292       Neuroscience Program Events
+https://calendars.illinois.edu/list/6294       Society for Equity in Astronomy
+https://calendars.illinois.edu/list/6295       IPRH Master Calendar
+https://calendars.illinois.edu/list/6241       Homecoming
+https://calendars.illinois.edu/list/6238       Anthropology Graduate Calendar
+https://calendars.illinois.edu/list/6273       Calendar JP
+https://calendars.illinois.edu/list/6250       My Calendar
+https://calendars.illinois.edu/list/6261       Advith's Calendar
+https://calendars.illinois.edu/list/6305       ABE Events
+https://calendars.illinois.edu/list/6325       LAS Success Workshops
+https://calendars.illinois.edu/list/6317       LAS Success Career Workshops
+https://calendars.illinois.edu/list/6316       DPI Calendar
+https://calendars.illinois.edu/list/6344       Carle Illinois College of Medicine General Events
+https://calendars.illinois.edu/list/6350       Atmospheric Sciences Events-Master
+https://calendars.illinois.edu/list/6330       ACDIS Calendar
+https://calendars.illinois.edu/list/6324       LAS Academic Success Workshops
+https://calendars.illinois.edu/list/6346       Calendar
+https://calendars.illinois.edu/list/6327       Illinois Entrepreneurship Master Calendar
+https://calendars.illinois.edu/list/6333       OCR Master Calendar - Select Centers + Engineering
+https://calendars.illinois.edu/list/6355       TED Calendar
+https://calendars.illinois.edu/list/6332       Test Master Calendar (OCR)
+https://calendars.illinois.edu/list/6393       AITS Events
+https://calendars.illinois.edu/list/6375       Health Maker Lab Calendar
+https://calendars.illinois.edu/list/6402       Neuroscience of Dance Lab
+https://calendars.illinois.edu/list/6415       IQUIST Master Calendar
+https://calendars.illinois.edu/list/6413       NRES Calendar
+https://calendars.illinois.edu/list/6405       ACE Calendar
+https://calendars.illinois.edu/list/6391       Events | DEV ACES Master Calendar :: University of Illinois
+https://calendars.illinois.edu/list/6383       ACES Office of International Programs
+https://calendars.illinois.edu/list/6403       HDFS Calendar
+https://calendars.illinois.edu/list/6392       AITS Main Calendar
+https://calendars.illinois.edu/list/6409       DNS Calendar
+https://calendars.illinois.edu/list/6407       Newsletters | FSHN Calendar :: University of Illinois
+https://calendars.illinois.edu/list/6410       ABE Calendar
+https://calendars.illinois.edu/list/6412       ALEC Calendar
+https://calendars.illinois.edu/list/6411       ANSC Calendar
+https://calendars.illinois.edu/list/6430       Gies Graduate Programs Admission Events
+https://calendars.illinois.edu/list/6445       Summer 2019 Wellness Initiative
+https://calendars.illinois.edu/list/6435       LAS Career Services
+https://calendars.illinois.edu/list/6473       PRI Staff Events
+https://calendars.illinois.edu/list/6421       Psychology Front Page
+https://calendars.illinois.edu/list/6474       PRI Staff Training events
+https://calendars.illinois.edu/list/6459       Entomology
+https://calendars.illinois.edu/list/6457       Illinois Global Institute
+https://calendars.illinois.edu/list/6467       OCR Event Manager - Master Calendar
+https://calendars.illinois.edu/list/6466       Calendar of Honors Opportunities Across Campus
+https://calendars.illinois.edu/list/6535       Finance Events
+https://calendars.illinois.edu/list/6530       COB Test Event Calendar
+https://calendars.illinois.edu/list/6499       LAS Career Services Events
+https://calendars.illinois.edu/list/6545       English Department Master Calendar
+https://calendars.illinois.edu/list/6502       PRI Staff Events (non-training)
+https://calendars.illinois.edu/list/6531       High-Energy Theory Physics Master Calendar
+https://calendars.illinois.edu/list/6549       Illinois Global Institute Event
+https://calendars.illinois.edu/list/6498       WIT Event Calendar
+https://calendars.illinois.edu/list/6548       Campuswide Microbial Systems Events
+https://calendars.illinois.edu/list/6544       PAPP Committee Schedule
+https://calendars.illinois.edu/list/6501       Evolution, Ecology, and Behavior
+https://calendars.illinois.edu/list/6537       Reservations 1013 ETMSW
+https://calendars.illinois.edu/list/6526       Master ALEC Calendar
+https://calendars.illinois.edu/list/6543       Student Wellness Calendar
+https://calendars.illinois.edu/list/6560       Illinois State Geological Survey Seminars
+https://calendars.illinois.edu/list/6571       HR Series Seminar Calendar
+https://calendars.illinois.edu/list/6610       Illinois State Water Survey events
+https://calendars.illinois.edu/list/6561       Illinois State Geological Survey Events (other)
+https://calendars.illinois.edu/list/6562       Illinois State Geological Survey-All Events
+https://calendars.illinois.edu/list/6579       Physics - HEP-PH Master Calendar
+https://calendars.illinois.edu/list/6590       Illinois ECE Alumni Events
+https://calendars.illinois.edu/list/6581       Gies Internal (Master)
+https://calendars.illinois.edu/list/6608       California Events
+https://calendars.illinois.edu/list/6577       Beckman and Campus Calendars
+https://calendars.illinois.edu/list/6585       Jason's Calendar
+https://calendars.illinois.edu/list/6555       OB Grand Rounds Calendar
+https://calendars.illinois.edu/list/6595       CGS Master Calendar (New -- unlinked to website)
+https://calendars.illinois.edu/list/6620       MDF Test Calendar
+https://calendars.illinois.edu/list/6557       Sanjana Main
+https://calendars.illinois.edu/list/6665       FSA New Member Presentation and Shows
+https://calendars.illinois.edu/list/6666       ACES Study Abroad
+https://calendars.illinois.edu/list/6656       Physics - Gravity Group Master Calendar
+https://calendars.illinois.edu/list/6634       LAS International Programs Events
+https://calendars.illinois.edu/list/6696       Cook County Master Naturalists Calendar
+https://calendars.illinois.edu/list/6692       IDEA Institute Event Calendar
+https://calendars.illinois.edu/list/6641       Events | Master Visit Calendar - OAP :: University of Illinois
+https://calendars.illinois.edu/list/6649       Calendar
+https://calendars.illinois.edu/list/6684       IDEA Institute Master Calendar
+https://calendars.illinois.edu/list/6639       Office of the Vice Chancellor for Access, Civil Rights & Community
+https://calendars.illinois.edu/list/6629       F&S Training Calendar
+https://calendars.illinois.edu/list/6625       SCD Calendar of Calendars
+https://calendars.illinois.edu/list/6717       Huang513
+https://calendars.illinois.edu/list/6735       Health Care Engineering Systems Center
+https://calendars.illinois.edu/list/6704       Department of Health Sciences Education & Pathology
+https://calendars.illinois.edu/list/6751       We CU Events Calendar
+https://calendars.illinois.edu/list/6702       Widget Examples 1
+https://calendars.illinois.edu/list/6700       Illinois Water Resources Center Events
+https://calendars.illinois.edu/list/6714       IFPU Calendar
+https://calendars.illinois.edu/list/6807       Humanities Research Institute Calendar
+https://calendars.illinois.edu/list/6780       REDCap Events
+https://calendars.illinois.edu/list/6821       Campus calendar
+https://calendars.illinois.edu/list/6822       HQAN Events
+https://calendars.illinois.edu/list/6781       Illinois Remote Calendar
+https://calendars.illinois.edu/list/6783       International Education
+https://calendars.illinois.edu/list/6819       Physics - Condensed Matter Journal Club
+https://calendars.illinois.edu/list/6766       Siebel School iCAN Calendar
+https://calendars.illinois.edu/list/6791       Applied Technologies for Learning in the Arts & Sciences (ATLAS)
+https://calendars.illinois.edu/list/6805       Illinois ECE Student Events Calendar
+https://calendars.illinois.edu/list/6793       School of Information Sciences Undergrad MASTER CALENDAR
+https://calendars.illinois.edu/list/6894       Dining Calendar
+https://calendars.illinois.edu/list/6825       School of Social Work Continuing Education Events & Webinars Calendar
+https://calendars.illinois.edu/list/6903       Events &#8211; Center for AstroPhysical Surveys
+https://calendars.illinois.edu/list/6860       ICASU Master Calendar
+https://calendars.illinois.edu/list/6855       Calendar
+https://calendars.illinois.edu/list/6876       Campus Recreation Master Calendar
+https://calendars.illinois.edu/list/6831       iSEE Sustainability Calendar
+https://calendars.illinois.edu/list/6850       Campus Humanities Central Calendar
+https://calendars.illinois.edu/list/6835       Abbott Contractor Schedule
+https://calendars.illinois.edu/list/6893       Jean's Calendar
+https://calendars.illinois.edu/list/6925       Dr. Martin Luther King, Jr. Annual Celebration
+https://calendars.illinois.edu/list/6912       Transportation Seminar Master
+https://calendars.illinois.edu/list/6905       Transportation
+https://calendars.illinois.edu/list/6932       Kent Seminar Series
+https://calendars.illinois.edu/list/6927       Calendar
+https://calendars.illinois.edu/list/6934       RailTEC Master Calendar
+https://calendars.illinois.edu/list/6906       Transportation Event Master
+https://calendars.illinois.edu/list/6951       AE3 Calendar
+https://calendars.illinois.edu/list/6970       CPSC Seminars PMPB
+https://calendars.illinois.edu/list/6978       Child Care Resource Service Training Calendar
+https://calendars.illinois.edu/list/6969       CPSC Calendar
+https://calendars.illinois.edu/list/6990       Calendar___1
+https://calendars.illinois.edu/list/7009       Siebel School CARES Office Hours
+https://calendars.illinois.edu/list/6965       Campus Teaching & Learning Events
+https://calendars.illinois.edu/list/6991       Illinois Mobile App Master Calendar
+https://calendars.illinois.edu/list/7023       ETL Computer Lab Reservation- ETMSW 2027
+https://calendars.illinois.edu/list/7026       NCSA Training and Seminars
+https://calendars.illinois.edu/list/7047       Siebel School Colloquium Series
+https://calendars.illinois.edu/list/7041       Upcoming Events
+https://calendars.illinois.edu/list/7037       NetMath Holidays Calendar
+https://calendars.illinois.edu/list/7057       ICTW Events
+https://calendars.illinois.edu/list/7046       Siebel School Speaker Series Master Calendar
+https://calendars.illinois.edu/list/7050       CEE Master Calendar (Internal)
+https://calendars.illinois.edu/list/7029       Siebel School Undergraduate Research
+https://calendars.illinois.edu/list/7059       Siebel Center for Design
+https://calendars.illinois.edu/list/7031       Reservations 3252 ETMSW
+https://calendars.illinois.edu/list/7072       Calendar
+https://calendars.illinois.edu/list/7113       Illinois School of Architecture Lecture Series
+https://calendars.illinois.edu/list/7076       NRES Seminars
+https://calendars.illinois.edu/list/7079       General Events - Department of Mathematics
+https://calendars.illinois.edu/list/7123       Siebel School Postdoc Events
+https://calendars.illinois.edu/list/7118       Illinois School of Architecture Main Calendar
+https://calendars.illinois.edu/list/7087       Spurlock Museum Master Calendar
+https://calendars.illinois.edu/list/7098       Test Calendar (Main)
+https://calendars.illinois.edu/list/7097       NCSA Calendar &#8211; NCSA | National Center for Supercomputing Applications
+https://calendars.illinois.edu/list/7152       HR Subcommittee
+https://calendars.illinois.edu/list/7139       iDegrees Student Activity Calendar
+https://calendars.illinois.edu/list/7155       Data management & Analytics (DMA) Subcommittee
+https://calendars.illinois.edu/list/7127       Illinois School of Architecture Events
+https://calendars.illinois.edu/list/7148       Student Subcommittee
+https://calendars.illinois.edu/list/7149       ESGC Main/Master Calendar
+https://calendars.illinois.edu/list/7153       UI Enterprise Systems Governance Committee
+https://calendars.illinois.edu/list/7163       Events of Interest to School of MCB undergraduates
+https://calendars.illinois.edu/list/7154       Cross-Functional Subcommittee
+https://calendars.illinois.edu/list/7180       ABE COE Committee Highlighted Events
+https://calendars.illinois.edu/list/7146       ACES Seminars
+https://calendars.illinois.edu/list/7156       Finance (FSC) Subcommittee
+https://calendars.illinois.edu/list/7157       CC Master Calendar
+https://calendars.illinois.edu/list/7181       Campuswide Study Abroad Events
+https://calendars.illinois.edu/list/7210       Creative Writing Upcoming Events
+https://calendars.illinois.edu/list/7223       SCD - Programs & Events
+https://calendars.illinois.edu/list/7224       SCD - Shop & Labs
+https://calendars.illinois.edu/list/7213       SLCL Event Calendar
+https://calendars.illinois.edu/list/7201       Early Learning Events in Illinois
+https://calendars.illinois.edu/list/7235       IUIN Ecosystem Events
+https://calendars.illinois.edu/list/7187       University Primary School
+https://calendars.illinois.edu/list/7222       Access Point, All Events
+https://calendars.illinois.edu/list/7234       *Master Calendar
+https://calendars.illinois.edu/list/7239       Undergraduate Research Master Calendar
+https://calendars.illinois.edu/list/7266       *Master Calendar
+https://calendars.illinois.edu/list/7246       Chemical & Biomolecular Engineering - Internal Events
+https://calendars.illinois.edu/list/7274       University High School Master Calendar
+https://calendars.illinois.edu/list/7301       Microreactor Project Calendar
+https://calendars.illinois.edu/list/7296       Physics - Nuclear Physics Seminar
+https://calendars.illinois.edu/list/7320       Informatics Mater Calendar
+https://calendars.illinois.edu/list/7341       Important Academic & Holiday Dates
+https://calendars.illinois.edu/list/7356       World Language Teacher Education Program
+https://calendars.illinois.edu/list/7408       SCD- Workshops and Seminars
+https://calendars.illinois.edu/list/7367       FAST Center of Illinois Calendar
+https://calendars.illinois.edu/list/7378       Mind in Vitro: an NSF Expedition In Computing
+https://calendars.illinois.edu/list/7401       Chemistry Diversity, Equity, and Inclusion Events
+https://calendars.illinois.edu/list/7360       ATLAS Internship Master Calendar
+https://calendars.illinois.edu/list/7418       CPSC Seminars
+https://calendars.illinois.edu/list/7364       Sexual Assault Awareness Month (SAAM) Calendar
+https://calendars.illinois.edu/list/7417       Mathematics Seminar Series: Topology
+https://calendars.illinois.edu/list/7421       Department of Mathematics - Master Calendar
+https://calendars.illinois.edu/list/7428       Digital Sign Events - Turner Hall
+https://calendars.illinois.edu/list/7454       Mathematics Seminar Series: Harmonic Analysis and Differential Equations (HADES)
+https://calendars.illinois.edu/list/7444       Office for Access & Equity event calendar
+https://calendars.illinois.edu/list/7460       Lemann Center Events
+https://calendars.illinois.edu/list/7456       AITS Appscertify Calendar
+https://calendars.illinois.edu/list/7439       Family & Graduate Housing - Event Calendar (Apartments)
+https://calendars.illinois.edu/list/7491       Test calendar
+https://calendars.illinois.edu/list/7537       CPSC Defenses
+https://calendars.illinois.edu/list/7545       REMAT Event Calendar
+https://calendars.illinois.edu/list/7509       MCB Internal Master Calendar
+https://calendars.illinois.edu/list/7523       University Housing Important Dates
+https://calendars.illinois.edu/list/7565       Teaching, Learning, and Academic Support
+https://calendars.illinois.edu/list/7614       WRC Career Development
+https://calendars.illinois.edu/list/7615       Survivor Strategies
+https://calendars.illinois.edu/list/7557       Pre-Law Master Calendar
+https://calendars.illinois.edu/list/7566       Women's Resources Center
+https://calendars.illinois.edu/list/7563       College of Dentistry Internal Calendar
+https://calendars.illinois.edu/list/7612       MENA Cultural Center Events Calendar
+https://calendars.illinois.edu/list/7588       College of Dentistry - Internal Event Calendar
+https://calendars.illinois.edu/list/7594       Illini Union Staff Training & Development
+https://calendars.illinois.edu/list/7604       Research Seminars @ Illinois
+https://calendars.illinois.edu/list/7616       Ecojustice Series 2026
+https://calendars.illinois.edu/list/7638       Mathematics Seminar Series: Combinatorics
+https://calendars.illinois.edu/list/7617       LER Seminar Series
+https://calendars.illinois.edu/list/7643       Mathematics Seminar Series: Probability
+https://calendars.illinois.edu/list/7635       ARC Gym 1 Court Availability
+https://calendars.illinois.edu/list/7676       Mathematics Seminar Series: Groups, Geometry, and Topology
+https://calendars.illinois.edu/list/7651       A-WIS (Academic Women in STEAM) Calendar
+https://calendars.illinois.edu/list/7663       OAE Workforce Equity event calendar
+https://calendars.illinois.edu/list/7671       Mathematics Seminar Series: Algebraic Geometry
+https://calendars.illinois.edu/list/7675       Employee Learning & Organizational Effectiveness
+https://calendars.illinois.edu/list/7619       Illinois Institute for Rehabilitation and Employment Research
+https://calendars.illinois.edu/list/7652       Mathematics Seminar Series: Quantum Working Group
+https://calendars.illinois.edu/list/7620       SWTCIE Illinois Events
+https://calendars.illinois.edu/list/7677       Chemical & Biomolecular Engineering - Cultural and Community Events Master calendar
+https://calendars.illinois.edu/list/7705       Grainger Engineering in Chicago Calendar
+https://calendars.illinois.edu/list/7687       ACE Seminars
+https://calendars.illinois.edu/list/7692       Carle Illinois College of Medicine OFAD Professional Development Events
+https://calendars.illinois.edu/list/7724       Mathematical Biology Calendar
+https://calendars.illinois.edu/list/7702       Civic Life Master Calendar
+https://calendars.illinois.edu/list/7684       Phys Test Master calendar
+https://calendars.illinois.edu/list/7695       Mathematics Seminar Series: Algebra, Geometry, and Combinatorics
+https://calendars.illinois.edu/list/7698       Department of Communication Calendar
+https://calendars.illinois.edu/list/7700       CSEC Event Calendar
+https://calendars.illinois.edu/list/7721       QCB master calendar
+https://calendars.illinois.edu/list/7718       PRI Media Calendar
+https://calendars.illinois.edu/list/7741       Engineering IT - Instructional Events
+https://calendars.illinois.edu/list/7746       Housing Events
+https://calendars.illinois.edu/list/7763       ILC Weekly Workshop Series
+https://calendars.illinois.edu/list/7728       CLIMB Events
+https://calendars.illinois.edu/list/7751       Lunch on Us
+https://calendars.illinois.edu/list/7777       IMMERSE Master Calendar
+https://calendars.illinois.edu/list/7769       QCB Event Calendar
+https://calendars.illinois.edu/list/7727       CLIMB Calendar
+https://calendars.illinois.edu/list/7778       IMMERSE Events
+https://calendars.illinois.edu/list/7725       Center for Digital Agriculture
+https://calendars.illinois.edu/list/7738       Seminars of Interest
+https://calendars.illinois.edu/list/7744       Test AI Events Search
+https://calendars.illinois.edu/list/7802       Mathematics Seminar Series: Analysis
+https://calendars.illinois.edu/list/7804       Institute of Communications Research (ICR) Events, College of Media
+https://calendars.illinois.edu/list/7823       Women in Engineering
+https://calendars.illinois.edu/list/7822       Women in Engineering
+https://calendars.illinois.edu/list/7799       UIUC PDH Events for Educators
+https://calendars.illinois.edu/list/7832       ACES Alumni Association
+https://calendars.illinois.edu/list/7820       Calendar
+https://calendars.illinois.edu/list/7827       Native American House
+https://calendars.illinois.edu/list/7872       Developing Equity-Minded Engineering Practitioners Center (DEEP)
+https://calendars.illinois.edu/list/7864       Counseling Center Master
+https://calendars.illinois.edu/list/7882       UIF Master Calendar
+https://calendars.illinois.edu/list/7932       Food For The Soul
+https://calendars.illinois.edu/list/7899       NURail CoE Calendar
+https://calendars.illinois.edu/list/7917       First Generation Student Initiatives FGSI Calendar
+https://calendars.illinois.edu/list/7889       UIF L&D
+https://calendars.illinois.edu/list/7893       PEEC
+https://calendars.illinois.edu/list/7922       Master of Health Administration Program Events
+https://calendars.illinois.edu/list/7935       IU Board Master Calendar
+https://calendars.illinois.edu/list/7907       ACES ODEI
+https://calendars.illinois.edu/list/7936       IU Board Meeting Calendar
+https://calendars.illinois.edu/list/7937       IU Board Events
+https://calendars.illinois.edu/list/7898       NURail CoE Master Calendar
+https://calendars.illinois.edu/list/7894       Plant Biology
+https://calendars.illinois.edu/list/7949       IBM-Illinois Discovery Accelerator Institute
+https://calendars.illinois.edu/list/7963       LAS Inclusive Excellence
+https://calendars.illinois.edu/list/7986       Chez Veterans Center
+https://calendars.illinois.edu/list/7939       Master of Public Health Program Events
+https://calendars.illinois.edu/list/7955       Bioengineering Master Calendar
+https://calendars.illinois.edu/list/7948       Chicago Tech Insider
+https://calendars.illinois.edu/list/7997       Bruce D. Nesbitt African American Cultural Center
+https://calendars.illinois.edu/list/7989       English Department Internal Events
+https://calendars.illinois.edu/list/8000       South Asia General Events
+https://calendars.illinois.edu/list/7987       Frank Center for Leadership and Innovation in Media Events, College of Media
+https://calendars.illinois.edu/list/8006       Jewish Studies Calendar
+https://calendars.illinois.edu/list/8027       HMNTL Seminar Series
+https://calendars.illinois.edu/list/8021       Illinois ADVANCE (I-ADVANCE) Program
+https://calendars.illinois.edu/list/8017       WLTE Master Calendar
+https://calendars.illinois.edu/list/8034       EngageNCSA Lightning Talks
+https://calendars.illinois.edu/list/8051       Traveling Science Center Events
+https://calendars.illinois.edu/list/8066       CITL Master Calendar (test)
+https://calendars.illinois.edu/list/8094       History internal events
+https://calendars.illinois.edu/list/8096       Test WBS Calendar
+https://calendars.illinois.edu/list/8114       College of Media Department of Media & Cinema Studies Events
+https://calendars.illinois.edu/list/8110       CLC-Table Reservations
+https://calendars.illinois.edu/list/8093       Illinois Forum on Human Flourishing in a Digital Age event calendar
+https://calendars.illinois.edu/list/8095       History Department Master Calendar
+https://calendars.illinois.edu/list/8092       Philosophy Master Calendar
+https://calendars.illinois.edu/list/8091       University Housing Events
+https://calendars.illinois.edu/list/8099       Campus Wellness Events
+https://calendars.illinois.edu/list/8129       Cultivating Care Garden
+https://calendars.illinois.edu/list/8120       DRI Calendar
+https://calendars.illinois.edu/list/8132       *Master Calendar MG Unit 26
+https://calendars.illinois.edu/list/8121       Global Relations Calendar
+https://calendars.illinois.edu/list/8137       Webinars and In Person Education: MG MN Unit 26
+https://calendars.illinois.edu/list/8172       IMMERSE Seminar Series
+https://calendars.illinois.edu/list/8151       Mathematics Seminar Series: Geometric Analysis
+https://calendars.illinois.edu/list/8162       Speakers Workshop Calendar
+https://calendars.illinois.edu/list/8118       NCSA Quantum Calendar
+https://calendars.illinois.edu/list/8175       Birding with Lily and Indigo 2026
+https://calendars.illinois.edu/list/8123       *Master Calendar MN Unit 26
+https://calendars.illinois.edu/list/8168       Calendar With Every Event Type
+https://calendars.illinois.edu/list/8212       ASRM Seminar Series
+https://calendars.illinois.edu/list/8216       CPSC Social Committee
+https://calendars.illinois.edu/list/8187       Office for Arts Integration - Master Calendar
+https://calendars.illinois.edu/list/8217       ASRM Event Calendar
+https://calendars.illinois.edu/list/8222       SkAI Institute Master Calendar
+https://calendars.illinois.edu/list/8221       SkAI Institute Events Calendar
+https://calendars.illinois.edu/list/8177       UIUCnewsbot
+https://calendars.illinois.edu/list/8197       SSIB Master Event Calendar
+https://calendars.illinois.edu/list/8253       Illinois Pathways to Partnerships Project Events
+https://calendars.illinois.edu/list/8270       Calendar
+https://calendars.illinois.edu/list/8228       Calendar
+https://calendars.illinois.edu/list/8286       MGMN Volunteer Opportunities Unit 26
+https://calendars.illinois.edu/list/8276       GPTS
+https://calendars.illinois.edu/list/8289       IIRER Staff Meetings
+https://calendars.illinois.edu/list/8263       Strategic Innovation
+https://calendars.illinois.edu/list/8292       IIRER Staff Meetings/Holidays + Institute-Wide Events
+https://calendars.illinois.edu/list/8315       Sexual Violence Prevention Events
+https://calendars.illinois.edu/list/8311       IIRER Events
+https://calendars.illinois.edu/list/8319       Playful By Design Calendar
+https://calendars.illinois.edu/list/8317       Game Studies and Design
+https://calendars.illinois.edu/list/8316       Informatics Programs Events Calendar
+https://calendars.illinois.edu/list/8299       2025-26 Academic Calendar
+https://calendars.illinois.edu/list/8322       Vet Med Food Truck
+https://calendars.illinois.edu/list/8326       Grainger Engineering Library Information Center Calendar
+https://calendars.illinois.edu/list/8314       ASA DVM Student Calendar
+https://calendars.illinois.edu/list/8298       Vet Med Clinical Rotations Block Calendar
+https://calendars.illinois.edu/list/8324       All Advancement Calendar
+https://calendars.illinois.edu/list/8332       Calendar
+https://calendars.illinois.edu/list/8303       College of Applied Health Sciences (AHS) Calendar
+https://calendars.illinois.edu/list/8347       SpaceMaRS Calendar
+https://calendars.illinois.edu/list/8365       IMMERSE Graduate Student Council
+https://calendars.illinois.edu/list/8345       Mathematics Social Events
+https://calendars.illinois.edu/list/8341       Undergraduate Calendar
+https://calendars.illinois.edu/list/8385       ODSR events
+https://calendars.illinois.edu/list/8356       Division of Exploratory Studies
+https://calendars.illinois.edu/list/8362       Persian Events Calender
+https://calendars.illinois.edu/list/8361       Persian Events Calender
+https://calendars.illinois.edu/list/8390       NCSA Events Calendar
+https://calendars.illinois.edu/list/8396       Unit Homecoming Calendar 2026
+https://calendars.illinois.edu/list/8405       LAS Educational Excellence
+https://calendars.illinois.edu/list/8400       Exploratory Studies On-Site Partners
+https://calendars.illinois.edu/list/8408       BSSD Events
+https://calendars.illinois.edu/list/8428       Faculty Development at CITL
+https://calendars.illinois.edu/list/8420       Carle Illinois College of Medicine - Mini Medical School
+https://calendars.illinois.edu/list/8416       Gen AI at CITL
+https://calendars.illinois.edu/list/8399       Asian American Heritage Month
+https://calendars.illinois.edu/list/8429       Reflect. Grow. Go.
+https://calendars.illinois.edu/list/8455       ADA Coordinator Office Events
+https://calendars.illinois.edu/list/8468       Wellness Hut Events
+https://calendars.illinois.edu/list/8441       The Group Chat
+https://calendars.illinois.edu/list/8444       EXP Advising in Weston
+https://calendars.illinois.edu/list/8459       Outdoor Center Fields Availability
+https://calendars.illinois.edu/list/8470       Fab Lab Event Calendar
+https://calendars.illinois.edu/list/8463       Digital Sign Events - Plant Sciences
+https://calendars.illinois.edu/list/8458       Complex Fields Availability
+https://calendars.illinois.edu/list/8445       Department of Mathematics: Graduate Seminar Series
+https://calendars.illinois.edu/list/8465       Digital Sign Events - ERML
+https://calendars.illinois.edu/list/8460       Engineering IT Calendar
+https://calendars.illinois.edu/list/8494       Data Science Events
+https://calendars.illinois.edu/list/8508       4 - Wednesday, September 30
+https://calendars.illinois.edu/list/8505       1 - Sunday, September 27
+https://calendars.illinois.edu/list/8484       Mental Health First Aid at Illinois
+https://calendars.illinois.edu/list/8503       Greek Homecoming Calendar
+https://calendars.illinois.edu/list/8507       3 - Tuesday, September 29
+https://calendars.illinois.edu/list/8483       All Teacher Training Events
+https://calendars.illinois.edu/list/8502       Homecoming Featured Events
+https://calendars.illinois.edu/list/8511       8 - Multi-day events
+https://calendars.illinois.edu/list/8509       6 - Friday, October 2
+https://calendars.illinois.edu/list/8510       7 - Saturday, October 3 (Game Day)
+https://calendars.illinois.edu/list/8504       DPI Teacher Training Other Events
+https://calendars.illinois.edu/list/8506       2 - Monday, September 28
+https://calendars.illinois.edu/list/8482       DPI Teacher Training Public Events
+https://calendars.illinois.edu/list/8493       Reflect. Grow. Go.
+https://calendars.illinois.edu/list/8501       All Homecoming Events
+https://calendars.illinois.edu/list/8488       CITL Internal Workshop Calendar
