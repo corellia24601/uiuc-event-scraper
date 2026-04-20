@@ -14,25 +14,28 @@ export async function register() {
   if (global.__scraperTimerStarted) return;
   global.__scraperTimerStarted = true;
 
-  // Defer startup scrape by 3 s to let the server finish initialising.
-  setTimeout(async () => {
+  async function syncSourcesAndScrape(label: string) {
+    try {
+      const { insertSource } = await import('./app/lib/db');
+      const { initialSources } = await import('./app/lib/sources');
+      for (const s of initialSources) {
+        insertSource.run(s.id, s.category, s.name, s.url, s.notes || '', s.active);
+      }
+    } catch (err) {
+      console.error(`[Scraper] Source sync failed (${label}):`, err);
+    }
     try {
       const { runScrape } = await import('./app/lib/scraper');
-      console.log('[Scraper] Running startup scrape…');
+      console.log(`[Scraper] Running ${label} scrape…`);
       await runScrape();
     } catch (err) {
-      console.error('[Scraper] Startup scrape failed:', err);
+      console.error(`[Scraper] ${label} scrape failed:`, err);
     }
+  }
 
-    // Hourly scrapes thereafter.
-    setInterval(async () => {
-      try {
-        const { runScrape } = await import('./app/lib/scraper');
-        console.log('[Scraper] Running hourly scrape…');
-        await runScrape();
-      } catch (err) {
-        console.error('[Scraper] Hourly scrape failed:', err);
-      }
-    }, 60 * 60 * 1000);
-  }, 3000);
+  // Defer startup scrape by 3 s to let the server finish initialising.
+  setTimeout(() => syncSourcesAndScrape('startup'), 3000);
+
+  // Hourly scrapes thereafter.
+  setInterval(() => syncSourcesAndScrape('hourly'), 60 * 60 * 1000);
 }
