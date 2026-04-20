@@ -737,6 +737,339 @@ function parseKAMHTML(html: string): EventData[] {
   return events;
 }
 
+// ─── RSS parser (Fighting Illini Athletics + generic Sidearm RSS) ─────────────
+
+function parseRSSFeed(xml: string): EventData[] {
+  const events: EventData[] = [];
+  const itemRe = /<item>([\s\S]*?)<\/item>/g;
+  let m: RegExpExecArray | null;
+
+  const tag = (block: string, name: string) =>
+    block.match(new RegExp(`<${name}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${name}>`))?.[1]?.trim() ||
+    block.match(new RegExp(`<${name}[^>]*>([^<]*)<\\/${name}>`))?.[1]?.trim() || '';
+
+  while ((m = itemRe.exec(xml)) !== null) {
+    const block = m[1];
+    const title = tag(block, 'title');
+    const link  = tag(block, 'link') || tag(block, 'guid');
+    const desc  = tag(block, 'description');
+    if (!title) continue;
+
+    // Prefer s:localstartdate (already local), fall back to ev:startdate
+    const startRaw = tag(block, 's:localstartdate') || tag(block, 'ev:startdate');
+    const endRaw   = tag(block, 's:localenddate')   || tag(block, 'ev:enddate');
+    const location = tag(block, 'ev:location');
+
+    const parseISOLocal = (iso: string): { date: string; time: string } => {
+      // "2026-03-19T11:00:00" or "2026-03-19T11:00:00-05:00" or "2026-03-19T16:00:00Z"
+      const dMatch = iso.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})/);
+      if (!dMatch) return { date: '', time: '' };
+      let h = parseInt(dMatch[2], 10);
+      const min = dMatch[3];
+      // If UTC (ends with Z), shift to CT (approximate: -5h)
+      if (iso.endsWith('Z')) {
+        h = (h - 5 + 24) % 24;
+        // If hour crosses midnight, adjust date (rare for sports events)
+      }
+      const ampm = h >= 12 ? 'pm' : 'am';
+      const h12  = h % 12 || 12;
+      return {
+        date: dMatch[1],
+        time: min === '00' ? `${h12}:00 ${ampm}` : `${h12}:${min} ${ampm}`,
+      };
+    };
+
+    const { date: start_date, time: start_time } = parseISOLocal(startRaw);
+    const { date: end_date,   time: end_time   } = parseISOLocal(endRaw);
+    if (!start_date) continue;
+
+    events.push({
+      title,
+      description: desc,
+      start_date,
+      end_date: end_date || start_date,
+      start_time,
+      end_time,
+      location,
+      url: link,
+      sponsor: '', contact: '', contact_email: '', views: 0, originating_calendar: '',
+    });
+  }
+  return events;
+}
+
+// ─── iCal parser (TLAS LibCal) ────────────────────────────────────────────────
+
+function parseICalFeed(text: string): EventData[] {
+  // Unfold folded lines (CRLF + space/tab)
+  const unfolded = text.replace(/\r?\n[ \t]/g, '');
+  const events: EventData[] = [];
+  const veventRe = /BEGIN:VEVENT([\s\S]*?)END:VEVENT/g;
+  let m: RegExpExecArray | null;
+
+  const field = (block: string, name: string) => {
+    const re = new RegExp(`^${name}(?:;[^:]*)?:(.*)$`, 'm');
+    return block.match(re)?.[1]?.trim() || '';
+  };
+
+  const parseDT = (val: string, paramStr: string): { date: string; time: string } => {
+    // All-day: VALUE=DATE or 8-digit only
+    if (paramStr.includes('VALUE=DATE') || /^\d{8}$/.test(val)) {
+      const d = val.replace(/^(\d{4})(\d{2})(\d{2})$/, '$1-$2-$3');
+      return { date: d, time: '' };
+    }
+    // Local or UTC datetime: 20260420T130000[Z]
+    const dtm = val.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})/);
+    if (!dtm) return { date: '', time: '' };
+    let h = parseInt(dtm[4], 10);
+    const min = dtm[5];
+    if (val.endsWith('Z')) h = (h - 5 + 24) % 24; // approx CT
+    const ampm = h >= 12 ? 'pm' : 'am';
+    const h12  = h % 12 || 12;
+    return {
+      date: `${dtm[1]}-${dtm[2]}-${dtm[3]}`,
+      time: `${h12}:${min} ${ampm}`,
+    };
+  };
+
+  while ((m = veventRe.exec(unfolded)) !== null) {
+    const block = m[1];
+    const summary   = field(block, 'SUMMARY');
+    const url       = field(block, 'URL');
+    const location  = field(block, 'LOCATION');
+    const desc      = field(block, 'DESCRIPTION').replace(/\\n/g, ' ').replace(/\\,/g, ',');
+
+    // Extract DTSTART param string (e.g., "TZID=America/Chicago")
+    const dtStartLine = block.match(/^(DTSTART[^:]*):(.*)$/m);
+    const dtEndLine   = block.match(/^(DTEND[^:]*):(.*)$/m);
+    const { date: start_date, time: start_time } = parseDT(dtStartLine?.[2]?.trim() ?? '', dtStartLine?.[1] ?? '');
+    const { date: end_date,   time: end_time   } = parseDT(dtEndLine?.[2]?.trim()   ?? '', dtEndLine?.[1]   ?? '');
+
+    if (!summary || !start_date) continue;
+    events.push({
+      title: summary, description: desc,
+      start_date, end_date: end_date || start_date,
+      start_time, end_time,
+      location, url,
+      sponsor: '', contact: '', contact_email: '', views: 0, originating_calendar: '',
+    });
+  }
+  return events;
+}
+
+// ─── Spurlock Museum ──────────────────────────────────────────────────────────
+
+function parseSpurlockHTML(html: string): EventData[] {
+  const events: EventData[] = [];
+  const currentYear = new Date().getFullYear();
+
+  // Each event: <a href="event.php?ID=NNN"> ... title ... </a>
+  // Surrounding context has the date and time
+  // Split on event anchor boundaries
+  const blocks = html.split(/<a\s+href="event\.php\?ID=\d+"/i);
+
+  for (let i = 1; i < blocks.length; i++) {
+    const block = blocks[i];
+    // Extract URL (ID)
+    const idMatch = html.match(/href="(event\.php\?ID=\d+)"/g)?.[i - 1];
+    const relUrl = idMatch?.match(/href="([^"]+)"/)?.[1] ?? '';
+    const url = relUrl ? `https://www.spurlock.illinois.edu/events/${relUrl}` : '';
+
+    // Title: text inside the <a> tag
+    const titleMatch = block.match(/^[^>]*>([^<]+)</);
+    const title = titleMatch?.[1]?.trim() || '';
+    if (!title) continue;
+
+    // Date: look for "Mon Apr 20" or "Apr 20" or similar in the 600 chars after the link
+    const context = block.slice(0, 600).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    const dateMatch = context.match(
+      /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+(\d{1,2})(?:,?\s*(\d{4}))?/i
+    );
+    if (!dateMatch) continue;
+    const mm = MONTH_ABBR_MAP[dateMatch[1].toUpperCase().slice(0, 3)];
+    if (!mm) continue;
+    const year = dateMatch[3] ? parseInt(dateMatch[3]) : currentYear;
+    const start_date = `${year}-${mm}-${dateMatch[2].padStart(2, '0')}`;
+
+    // Time: "7:00 pm–8:00 pm" or "7:00 pm - 8:00 pm"
+    const { startTime, endTime } = parseTimeSpan(
+      context.match(/\d{1,2}:\d{2}\s*(?:am|pm)[^<]*/i)?.[0] ?? ''
+    );
+
+    events.push({
+      title, description: '',
+      start_date, end_date: start_date,
+      start_time: startTime, end_time: endTime,
+      location: '', url,
+      sponsor: '', contact: '', contact_email: '', views: 0, originating_calendar: '',
+    });
+  }
+  return events;
+}
+
+// ─── State Farm Center ────────────────────────────────────────────────────────
+
+function parseStateFarmCenterHTML(html: string): EventData[] {
+  const events: EventData[] = [];
+
+  // Cards: <a href="/events/detail/[slug]">...</a>
+  const cardRe = /<a\s+href="(\/events\/detail\/[^"]+)"[^>]*>([\s\S]*?)<\/a>/gi;
+  let m: RegExpExecArray | null;
+
+  while ((m = cardRe.exec(html)) !== null) {
+    const relUrl = m[1];
+    const inner  = m[2];
+    const url = `https://www.statefarmcenter.com${relUrl}`;
+
+    // Title: inside <h3>
+    const title = inner.match(/<h3[^>]*>([^<]+)<\/h3>/i)?.[1]?.trim() ?? '';
+    if (!title) continue;
+
+    // Strip all tags to get plain text for date/time extraction
+    const text = inner.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
+    // Date: "Apr. 26, 2026" or "April 26, 2026"
+    const dateMatch = text.match(
+      /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+(\d{1,2}),\s*(\d{4})/i
+    );
+    if (!dateMatch) continue;
+    const mm = MONTH_ABBR_MAP[dateMatch[1].toUpperCase().slice(0, 3)];
+    if (!mm) continue;
+    const start_date = `${dateMatch[3]}-${mm}-${dateMatch[2].padStart(2, '0')}`;
+
+    // Time
+    const { startTime, endTime } = parseTimeSpan(text.match(/\d{1,2}:\d{2}\s*(?:am|pm)[^$]*/i)?.[0] ?? '');
+
+    // Location: anything after the date that looks like a venue
+    const locMatch = text.match(/(?:at|@|venue:?)\s*([A-Z][^.]+)/i);
+    const location = locMatch?.[1]?.trim() ?? '';
+
+    events.push({
+      title, description: '',
+      start_date, end_date: start_date,
+      start_time: startTime, end_time: endTime,
+      location, url,
+      sponsor: '', contact: '', contact_email: '', views: 0, originating_calendar: '',
+    });
+  }
+  return events;
+}
+
+// ─── Grainger College of Engineering (direct site) ───────────────────────────
+
+function parseGraingerHTML(html: string): EventData[] {
+  const events: EventData[] = [];
+
+  // Events rendered as list items; links point to calendars.illinois.edu/detail/2568
+  // Pattern: <a href="...calendars.illinois.edu/detail/...">Title</a>
+  // Followed by date/time and location as plain text
+  const linkRe = /<a\s+[^>]*href="([^"]*calendars\.illinois\.edu\/detail\/[^"]+)"[^>]*>([\s\S]*?)<\/a>([\s\S]{0,400}?)(?=<a\s+[^>]*href="[^"]*calendars\.illinois\.edu|<\/[uo]l>|$)/gi;
+  let m: RegExpExecArray | null;
+
+  while ((m = linkRe.exec(html)) !== null) {
+    const url   = m[1].startsWith('http') ? m[1] : `https:${m[1]}`;
+    const title = m[2].replace(/<[^>]+>/g, '').trim();
+    if (!title) continue;
+
+    const context = m[3].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
+    // Date: "Monday, Apr 20, 2026" or "Apr 20, 2026"
+    const dateMatch = context.match(
+      /(?:\w+,\s+)?(\w+)\s+(\d{1,2}),\s*(\d{4})/
+    );
+    if (!dateMatch) continue;
+    const mm = MONTH_MAP[dateMatch[1]] || MONTH_ABBR_MAP[dateMatch[1].toUpperCase().slice(0, 3)];
+    if (!mm) continue;
+    const start_date = `${dateMatch[3]}-${mm}-${dateMatch[2].padStart(2, '0')}`;
+
+    // Time: "3:30 PM" or "3:30 PM - 5:00 PM"
+    const { startTime, endTime } = parseTimeSpan(
+      context.match(/\d{1,2}:\d{2}\s*(?:AM|PM)[\s\S]{0,40}/i)?.[0]?.slice(0, 40) ?? ''
+    );
+
+    // Location: text after time, strip "HYBRID:" prefix
+    const locMatch = context.match(/HYBRID:\s*(.+)|(?:Room|Hall|Lab|Center|Building|Auditorium)[^,\n]*/i);
+    const location = (locMatch?.[1] || locMatch?.[0] || '').trim();
+
+    events.push({
+      title, description: '',
+      start_date, end_date: start_date,
+      start_time: startTime, end_time: endTime,
+      location, url,
+      sponsor: '', contact: '', contact_email: '', views: 0, originating_calendar: '',
+    });
+  }
+  return events;
+}
+
+// ─── iSchool (month-by-month pages) ──────────────────────────────────────────
+
+function parseISchoolHTML(html: string, yyyymm: string): EventData[] {
+  const events: EventData[] = [];
+  const year  = parseInt(yyyymm.slice(0, 4), 10);
+  const month = yyyymm.slice(4, 6);
+
+  // Date headers: <h3>April 1 Wednesday</h3>  (or similar)
+  // Event links: <a href="/news-events/events/YYYY/MM/DD/slug">Title</a>
+  // Time: plain text near the link
+
+  // Build a flat representation: split on date headers then on event links
+  const sections = html.split(/<h3[^>]*>/i);
+
+  for (const section of sections.slice(1)) {
+    // Extract day from header text "April 1 Wednesday" → day "01"
+    const headerText = section.match(/^([^<]+)/)?.[1]?.trim() ?? '';
+    const dayMatch = headerText.match(/\b(\d{1,2})\b/);
+    if (!dayMatch) continue;
+    const day = dayMatch[1].padStart(2, '0');
+    const start_date = `${year}-${month}-${day}`;
+
+    // Find event links in this section (up to next h3)
+    const sectionContent = section.match(/^[\s\S]*?(?=<h3|$)/)?.[0] ?? section;
+    const linkRe = /<a\s+href="(\/news-events\/events\/\d{4}\/\d{2}\/\d{2}\/[^"]+)"[^>]*>([\s\S]*?)<\/a>/gi;
+    let lm: RegExpExecArray | null;
+
+    while ((lm = linkRe.exec(sectionContent)) !== null) {
+      const relUrl = lm[1];
+      const title  = lm[2].replace(/<[^>]+>/g, '').trim();
+      if (!title) continue;
+      const url = `https://ischool.illinois.edu${relUrl}`;
+
+      // Time: "1:00 - 3:00 PM" somewhere after the link
+      const afterLink = sectionContent.slice(lm.index + lm[0].length, lm.index + lm[0].length + 300);
+      const timeText  = afterLink.replace(/<[^>]+>/g, ' ').match(/\d{1,2}:\d{2}\s*[-–]?\s*\d{0,2}:?\d{0,2}\s*(?:AM|PM)/i)?.[0] ?? '';
+      const { startTime, endTime } = parseTimeSpan(timeText);
+
+      events.push({
+        title, description: '',
+        start_date, end_date: start_date,
+        start_time: startTime, end_time: endTime,
+        location: '', url,
+        sponsor: '', contact: '', contact_email: '', views: 0, originating_calendar: '',
+      });
+    }
+  }
+  return events;
+}
+
+async function scrapeISchoolMultiMonth(baseUrl: string): Promise<EventData[]> {
+  const now  = new Date();
+  const all: EventData[] = [];
+
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    const yyyymm = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const url = `https://ischool.illinois.edu/news-events/events/${yyyymm}?tag=All`;
+    try {
+      const html = await fetchHtml(url);
+      if (html) all.push(...parseISchoolHTML(html, yyyymm));
+    } catch (err) {
+      console.error(`[iSchool] Error fetching ${yyyymm}:`, err);
+    }
+  }
+  return all;
+}
+
 // ─── Dispatcher ───────────────────────────────────────────────────────────────
 
 async function scrapeSource(url: string): Promise<EventData[]> {
@@ -752,6 +1085,29 @@ async function scrapeSource(url: string): Promise<EventData[]> {
   if (/kam\.illinois\.edu\/exhibitions-events\/events/i.test(u)) {
     const html = await fetchHtmlWithBrowser(u);
     return html ? parseKAMHTML(html) : [];
+  }
+  if (/ischool\.illinois\.edu\/news-events\/events/i.test(u)) {
+    return scrapeISchoolMultiMonth(u);
+  }
+  if (/fightingillini\.com.*\.rss/i.test(u)) {
+    const xml = await fetchHtml(u);
+    return xml ? parseRSSFeed(xml) : [];
+  }
+  if (/libcal\.library\.illinois\.edu.*ical/i.test(u)) {
+    const ical = await fetchHtml(u);
+    return ical ? parseICalFeed(ical) : [];
+  }
+  if (/spurlock\.illinois\.edu\/events/i.test(u)) {
+    const html = await fetchHtml(u);
+    return html ? parseSpurlockHTML(html) : [];
+  }
+  if (/statefarmcenter\.com\/events/i.test(u)) {
+    const html = await fetchHtml(u);
+    return html ? parseStateFarmCenterHTML(html) : [];
+  }
+  if (/grainger\.illinois\.edu\/calendars/i.test(u)) {
+    const html = await fetchHtml(u);
+    return html ? parseGraingerHTML(html) : [];
   }
 
   // Auto-detect by fetching and examining the HTML
@@ -876,15 +1232,33 @@ function deduplicateEvents(events: CollectedEvent[]): Array<CollectedEvent & { s
   });
 }
 
+// ─── Scrape progress (polled by /api/status) ─────────────────────────────────
+
+export const scrapeState = {
+  running: false,
+  current: 0,
+  total: 0,
+  currentSource: '',
+  completedAt: 0,
+};
+
 // ─── Main orchestrator ────────────────────────────────────────────────────────
 
 export async function runScrape(): Promise<{ total: number; errors: string[] }> {
+  if (scrapeState.running) return { total: 0, errors: ['Scrape already in progress'] };
+
   const sources = getActiveSources.all();
   const collected: CollectedEvent[] = [];
   const errors: string[] = [];
 
+  scrapeState.running = true;
+  scrapeState.current = 0;
+  scrapeState.total = sources.length;
+  scrapeState.currentSource = '';
+
   // ── Phase 1: scrape every active source ──────────────────────────────────
   for (const source of sources) {
+    scrapeState.currentSource = source.name;
     try {
       const events = await scrapeSource(source.url);
       for (const e of events) {
@@ -896,6 +1270,7 @@ export async function runScrape(): Promise<{ total: number; errors: string[] }> 
       console.error(`[Scraper] ${msg}`);
       errors.push(msg);
     }
+    scrapeState.current += 1;
   }
 
   // ── Phase 2: deduplicate across all sources ───────────────────────────────
@@ -921,6 +1296,9 @@ export async function runScrape(): Promise<{ total: number; errors: string[] }> 
   }
 
   await closeBrowser();
+  scrapeState.running = false;
+  scrapeState.currentSource = '';
+  scrapeState.completedAt = Date.now();
   console.log(`[Scraper] Done. Total unique events stored: ${merged.length}`);
   return { total: merged.length, errors };
 }

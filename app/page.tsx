@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 interface Event {
@@ -23,6 +23,15 @@ interface Event {
   source_links: string;
 }
 
+type SetupPhase = 'checking' | 'initializing' | 'scraping' | 'ready';
+
+interface ScrapeProgress {
+  running: boolean;
+  current: number;
+  total: number;
+  currentSource: string;
+}
+
 export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
   const [allEvents, setAllEvents] = useState<Event[]>([]);
@@ -39,11 +48,85 @@ export default function Home() {
   const [uniqueOriginatingCalendars, setUniqueOriginatingCalendars] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'date' | 'views'>('date');
 
+  const [setupPhase, setSetupPhase] = useState<SetupPhase>('checking');
+  const [initProgress, setInitProgress] = useState(0);
+  const [scrapeProgress, setScrapeProgress] = useState<ScrapeProgress>({ running: false, current: 0, total: 0, currentSource: '' });
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchEvents('');
-    }, 100);
-    return () => clearTimeout(timer);
+    let animFrame: ReturnType<typeof setTimeout>;
+
+    async function checkAndSetup() {
+      try {
+        const res = await fetch('/api/status');
+        const status = await res.json();
+
+        if (status.eventCount > 0 && !status.scrape.running) {
+          // Events already exist — go straight to the feed
+          setSetupPhase('ready');
+          fetchEvents('');
+          return;
+        }
+
+        if (status.scrape.running) {
+          // Scrape already in progress (e.g. triggered by instrumentation)
+          setSetupPhase('scraping');
+          setScrapeProgress(status.scrape);
+          startPolling();
+          return;
+        }
+
+        // Need to initialise and/or scrape
+        if (!status.initialized) {
+          setSetupPhase('initializing');
+          // Animate init bar 0 → 85% while the POST is in flight
+          let pct = 0;
+          const tick = () => {
+            pct = Math.min(pct + 12, 85);
+            setInitProgress(pct);
+            if (pct < 85) animFrame = setTimeout(tick, 60);
+          };
+          tick();
+        } else {
+          setSetupPhase('scraping');
+        }
+
+        await fetch('/api/setup', { method: 'POST' });
+
+        // Init done — snap bar to 100% then transition to scraping
+        clearTimeout(animFrame);
+        setInitProgress(100);
+        await new Promise(r => setTimeout(r, 400));
+        setSetupPhase('scraping');
+        startPolling();
+      } catch {
+        setSetupPhase('ready');
+        fetchEvents('');
+      }
+    }
+
+    function startPolling() {
+      pollRef.current = setInterval(async () => {
+        try {
+          const r = await fetch('/api/status');
+          const s = await r.json();
+          setScrapeProgress(s.scrape);
+          if (!s.scrape.running) {
+            clearInterval(pollRef.current!);
+            pollRef.current = null;
+            setSetupPhase('ready');
+            fetchEvents('');
+          }
+        } catch { /* ignore transient errors */ }
+      }, 1500);
+    }
+
+    checkAndSetup();
+    return () => {
+      clearTimeout(animFrame);
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchEvents = async (query: string = '') => {
@@ -230,6 +313,81 @@ export default function Home() {
     return `${datePart}  ·  ${timePart}`;
   };
 
+  // ── Setup / loading screens ──────────────────────────────────────────────
+  if (setupPhase === 'checking') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center text-gray-500">
+          <div className="text-4xl animate-spin mb-4">⏳</div>
+          <p className="text-lg font-medium">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (setupPhase === 'initializing') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="bg-white rounded-2xl shadow-lg p-10 w-full max-w-md text-center">
+          <div className="mb-6">
+            <div className="w-16 h-16 mx-auto rounded-full bg-orange-100 flex items-center justify-center mb-4">
+              <svg className="w-8 h-8 text-orange-500 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7M9 11h6M12 8v6"/>
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-1">Initializing Event Source Pool</h2>
+            <p className="text-sm text-gray-500">Loading 30+ UIUC event sources...</p>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+            <div
+              className="h-3 rounded-full bg-orange-500 transition-all duration-200 ease-out"
+              style={{ width: `${initProgress}%` }}
+            />
+          </div>
+          <p className="text-xs text-gray-400 mt-2">{initProgress}%</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (setupPhase === 'scraping') {
+    const pct = scrapeProgress.total > 0
+      ? Math.round((scrapeProgress.current / scrapeProgress.total) * 100)
+      : 0;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="bg-white rounded-2xl shadow-lg p-10 w-full max-w-md text-center">
+          <div className="mb-6">
+            <div className="w-16 h-16 mx-auto rounded-full bg-blue-100 flex items-center justify-center mb-4">
+              <svg className="w-8 h-8 text-blue-600 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582M20 20v-5h-.581M5.635 15A9 9 0 1 0 4.582 9"/>
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-1">Scraping Events</h2>
+            <p className="text-sm text-gray-500 min-h-[1.25rem]">
+              {scrapeProgress.currentSource
+                ? `Fetching: ${scrapeProgress.currentSource}...`
+                : 'Starting up...'}
+            </p>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+            <div
+              className="h-3 rounded-full bg-blue-600 transition-all duration-500 ease-out"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <p className="text-xs text-gray-400 mt-2">
+            {scrapeProgress.total > 0
+              ? `${scrapeProgress.current} / ${scrapeProgress.total} sources  ·  ${pct}%`
+              : 'Preparing sources...'}
+          </p>
+          <p className="text-xs text-gray-400 mt-4">This takes 3–5 minutes on first run.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Normal events feed ────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm">
