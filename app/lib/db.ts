@@ -195,3 +195,11 @@ export const deleteEventsBySource = {
     writeDb(db);
   },
 };
+
+export const deactivateSource = {
+  run: (id: number) => {
+    const db = readDb();
+    const source = db.sources.find(s => s.id === id);
+    if (source) { source.active = false; writeDb(db); }
+  },
+};

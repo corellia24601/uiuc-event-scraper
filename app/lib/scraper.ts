@@ -1,4 +1,4 @@
-import { getActiveSources, insertEvent, deleteEventsBySource } from './db';
+import { getActiveSources, insertEvent, deleteEventsBySource, deactivateSource } from './db';
 
 export interface EventData {
   title: string;
@@ -1247,8 +1247,8 @@ export const scrapeState = {
 export async function runScrape(): Promise<{ total: number; errors: string[] }> {
   if (scrapeState.running) return { total: 0, errors: ['Scrape already in progress'] };
 
-  const sources = getActiveSources.all();
-  const collected: CollectedEvent[] = [];
+  // Sort by id ascending so existing (lower-id) sources win dedup priority
+  const sources = getActiveSources.all().sort((a, b) => a.id - b.id);
   const errors: string[] = [];
 
   scrapeState.running = true;
@@ -1256,30 +1256,52 @@ export async function runScrape(): Promise<{ total: number; errors: string[] }> 
   scrapeState.total = sources.length;
   scrapeState.currentSource = '';
 
-  // ── Phase 1: scrape every active source ──────────────────────────────────
-  for (const source of sources) {
+  // ── Phase 1: scrape every active source (5 sources in parallel) ───────────
+  // Track raw event counts per source so we can detect pure-duplicate sources.
+  const rawCountById = new Map<number, number>();
+  const allCollected: CollectedEvent[] = [];
+  const mu = { locked: false };
+
+  await pooledMap(sources, 5, async (source) => {
     scrapeState.currentSource = source.name;
     try {
       const events = await scrapeSource(source.url);
-      for (const e of events) {
-        collected.push({ ...e, source_id: source.id, source_name: source.name });
-      }
+      rawCountById.set(source.id, events.length);
+      // Collect under a shared lock to preserve ordering (lower-id sources first)
+      while (mu.locked) await new Promise(r => setTimeout(r, 5));
+      mu.locked = true;
+      for (const e of events) allCollected.push({ ...e, source_id: source.id, source_name: source.name });
+      mu.locked = false;
       console.log(`[Scraper] ${source.name}: ${events.length} events`);
     } catch (error) {
+      rawCountById.set(source.id, 0);
       const msg = `Error scraping ${source.name}: ${error instanceof Error ? error.message : String(error)}`;
       console.error(`[Scraper] ${msg}`);
       errors.push(msg);
     }
     scrapeState.current += 1;
-  }
+  });
+
+  // Re-sort collected by source id so lower-id sources are first in dedup groups
+  allCollected.sort((a, b) => a.source_id - b.source_id);
 
   // ── Phase 2: deduplicate across all sources ───────────────────────────────
-  const merged = deduplicateEvents(collected);
-  console.log(
-    `[Scraper] Deduplication: ${collected.length} raw → ${merged.length} unique events`
-  );
+  const merged = deduplicateEvents(allCollected);
+  console.log(`[Scraper] Deduplication: ${allCollected.length} raw → ${merged.length} unique events`);
 
-  // ── Phase 3: replace DB contents for all active sources ──────────────────
+  // ── Phase 3: auto-deactivate pure-duplicate sources ───────────────────────
+  // A source is a pure duplicate if it produced raw events but none survived
+  // deduplication as the primary record (all were absorbed by lower-id sources).
+  const survivingSourceIds = new Set(merged.map(e => e.source_id));
+  for (const source of sources) {
+    const raw = rawCountById.get(source.id) ?? 0;
+    if (raw > 0 && !survivingSourceIds.has(source.id)) {
+      console.log(`[Scraper] Auto-deactivating pure-duplicate source: ${source.name} (id=${source.id})`);
+      deactivateSource.run(source.id);
+    }
+  }
+
+  // ── Phase 4: replace DB contents for all active sources ──────────────────
   for (const source of sources) {
     deleteEventsBySource.run(source.id);
   }
