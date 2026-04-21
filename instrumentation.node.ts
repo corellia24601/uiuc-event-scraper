@@ -16,10 +16,13 @@ export async function register() {
 
   async function syncSourcesAndScrape(label: string) {
     try {
-      const { insertSource } = await import('./app/lib/db');
+      const { insertSource, getPermanentlyDeletedIds } = await import('./app/lib/db');
       const { initialSources } = await import('./app/lib/sources');
+      const deleted = new Set(getPermanentlyDeletedIds.all());
       for (const s of initialSources) {
-        insertSource.run(s.id, s.category, s.name, s.url, s.notes || '', s.active);
+        if (!deleted.has(s.id)) {
+          insertSource.run(s.id, s.category, s.name, s.url, s.notes || '', s.active);
+        }
       }
     } catch (err) {
       console.error(`[Scraper] Source sync failed (${label}):`, err);

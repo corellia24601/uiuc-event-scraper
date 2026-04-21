@@ -1,4 +1,4 @@
-import { getActiveSources, insertEvent, deleteEventsBySource, deactivateSource } from './db';
+import { getActiveSources, insertEvent, deleteEventsBySource, permanentlyDeleteSource } from './db';
 
 export interface EventData {
   title: string;
@@ -1297,7 +1297,7 @@ export async function runScrape(): Promise<{ total: number; errors: string[] }> 
     const raw = rawCountById.get(source.id) ?? 0;
     if (raw > 0 && !survivingSourceIds.has(source.id)) {
       console.log(`[Scraper] Auto-deactivating pure-duplicate source: ${source.name} (id=${source.id})`);
-      deactivateSource.run(source.id);
+      permanentlyDeleteSource.run(source.id);
     }
   }
 

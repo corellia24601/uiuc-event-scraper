@@ -34,22 +34,25 @@ export interface EventRow {
 interface DbState {
   sources: SourceRow[];
   events: EventRow[];
+  permanently_deleted_ids: number[];
 }
 
 const DB_PATH = path.join(process.env.DATA_DIR ?? process.cwd(), 'data.json');
 
 function readDb(): DbState {
   if (!fs.existsSync(DB_PATH)) {
-    const initial: DbState = { sources: [], events: [] };
+    const initial: DbState = { sources: [], events: [], permanently_deleted_ids: [] };
     fs.writeFileSync(DB_PATH, JSON.stringify(initial, null, 2), 'utf8');
     return initial;
   }
 
   const raw = fs.readFileSync(DB_PATH, 'utf8');
   try {
-    return JSON.parse(raw) as DbState;
+    const parsed = JSON.parse(raw) as DbState;
+    if (!parsed.permanently_deleted_ids) parsed.permanently_deleted_ids = [];
+    return parsed;
   } catch {
-    const initial: DbState = { sources: [], events: [] };
+    const initial: DbState = { sources: [], events: [], permanently_deleted_ids: [] };
     fs.writeFileSync(DB_PATH, JSON.stringify(initial, null, 2), 'utf8');
     return initial;
   }
@@ -201,5 +204,20 @@ export const deactivateSource = {
     const db = readDb();
     const source = db.sources.find(s => s.id === id);
     if (source) { source.active = false; writeDb(db); }
+  },
+};
+
+export const getPermanentlyDeletedIds = {
+  all: (): number[] => readDb().permanently_deleted_ids,
+};
+
+export const permanentlyDeleteSource = {
+  run: (id: number) => {
+    const db = readDb();
+    db.sources = db.sources.filter(s => s.id !== id);
+    if (!db.permanently_deleted_ids.includes(id)) {
+      db.permanently_deleted_ids.push(id);
+    }
+    writeDb(db);
   },
 };
