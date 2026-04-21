@@ -741,7 +741,7 @@ export const initialSources: Source[] = [
   { id: 342, category: "Research Centers & Labs", name: "Research Park Events", url: "https://calendars.illinois.edu/list/3462", notes: "via UIUC calendar", active: true },
 
   // ── Colleges & Schools ──
-  { id: 343, category: "Colleges & Schools", name: ""FAA Online" Calendar", url: "https://calendars.illinois.edu/list/3479", notes: "via UIUC calendar", active: true },
+  { id: 343, category: "Colleges & Schools", name: '"FAA Online" Calendar', url: "https://calendars.illinois.edu/list/3479", notes: "via UIUC calendar", active: true },
 
   // ── Research Centers & Labs ──
   { id: 344, category: "Research Centers & Labs", name: "Uni High Weekly Memo | University Laboratory High School", url: "https://calendars.illinois.edu/list/3467", notes: "via UIUC calendar", active: true },
