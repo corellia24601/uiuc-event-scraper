@@ -44,8 +44,10 @@ export default function Home() {
   const [dateTo, setDateTo] = useState('');
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
   const [uniqueSources, setUniqueSources] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedOriginatingCalendars, setSelectedOriginatingCalendars] = useState<string[]>([]);
-  const [uniqueOriginatingCalendars, setUniqueOriginatingCalendars] = useState<string[]>([]);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [categoryCalendars, setCategoryCalendars] = useState<Record<string, string[]>>({});
   const [sortBy, setSortBy] = useState<'date' | 'views'>('date');
 
   const [setupPhase, setSetupPhase] = useState<SetupPhase>('checking');
@@ -62,24 +64,20 @@ export default function Home() {
         const status = await res.json();
 
         if (status.eventCount > 0 && !status.scrape.running) {
-          // Events already exist — go straight to the feed
           setSetupPhase('ready');
           fetchEvents('');
           return;
         }
 
         if (status.scrape.running) {
-          // Scrape already in progress (e.g. triggered by instrumentation)
           setSetupPhase('scraping');
           setScrapeProgress(status.scrape);
           startPolling();
           return;
         }
 
-        // Need to initialise and/or scrape
         if (!status.initialized) {
           setSetupPhase('initializing');
-          // Animate init bar 0 → 85% while the POST is in flight
           let pct = 0;
           const tick = () => {
             pct = Math.min(pct + 12, 85);
@@ -93,7 +91,6 @@ export default function Home() {
 
         await fetch('/api/setup', { method: 'POST' });
 
-        // Init done — snap bar to 100% then transition to scraping
         clearTimeout(animFrame);
         setInitProgress(100);
         await new Promise(r => setTimeout(r, 400));
@@ -146,17 +143,23 @@ export default function Home() {
       const data = await response.json();
       const eventArray = Array.isArray(data) ? data : [];
       setAllEvents(eventArray);
-      
-      // Extract unique sources and originating calendars
-      const sources = Array.from(new Set(eventArray.map(e => e.source_name))).sort();
-      setUniqueSources(sources);
-      const origCals = Array.from(
-        new Set(eventArray.map(e => e.originating_calendar).filter(Boolean))
-      ).sort() as string[];
-      setUniqueOriginatingCalendars(origCals);
 
-      // Apply filters
-      applyFilters(eventArray, searchQuery, dateFrom, dateTo, selectedSources, selectedOriginatingCalendars, sortBy);
+      // Extract unique source names for Event Host filter
+      const sources = Array.from(new Set(eventArray.map((e: Event) => e.source_name))).sort() as string[];
+      setUniqueSources(sources);
+
+      // Build category → originating calendars map for hierarchical Event Category filter
+      const catCals: Record<string, string[]> = {};
+      for (const e of eventArray as Event[]) {
+        if (!catCals[e.category]) catCals[e.category] = [];
+        if (e.originating_calendar && !catCals[e.category].includes(e.originating_calendar)) {
+          catCals[e.category].push(e.originating_calendar);
+        }
+      }
+      for (const cat in catCals) catCals[cat].sort();
+      setCategoryCalendars(catCals);
+
+      applyFilters(eventArray, searchQuery, dateFrom, dateTo, selectedSources, selectedCategories, selectedOriginatingCalendars, sortBy);
     } catch (error) {
       console.error('Error fetching events:', error);
       setAllEvents([]);
@@ -173,45 +176,40 @@ export default function Home() {
     from: string,
     to: string,
     sources: string[],
+    categories: string[],
     origCals: string[],
     sort: 'date' | 'views'
   ) => {
     let filtered = eventsToFilter;
 
-    // Apply search filter
     if (search.trim()) {
       const query = search.toLowerCase();
       filtered = filtered.filter(
-        e =>
-          e.title.toLowerCase().includes(query) ||
-          e.description.toLowerCase().includes(query)
+        e => e.title.toLowerCase().includes(query) || e.description.toLowerCase().includes(query)
       );
     }
 
-    // Apply date range filter using overlap logic:
-    // An event is included if its date range overlaps with [from, to].
-    // A multi-day event (Apr 16 – Aug 10) overlaps with filter "Aug 1 – Aug 2"
-    // because it hasn't ended before Aug 1 and hasn't started after Aug 2.
     if (from || to) {
       filtered = filtered.filter(e => {
         const evEnd = e.end_date || e.start_date;
-        if (from && evEnd < from) return false;  // event ends before filter starts
-        if (to && e.start_date > to) return false;  // event starts after filter ends
+        if (from && evEnd < from) return false;
+        if (to && e.start_date > to) return false;
         return true;
       });
     }
 
-    // Apply source filter
     if (sources.length > 0) {
       filtered = filtered.filter(e => sources.includes(e.source_name));
     }
 
-    // Apply originating calendar filter
-    if (origCals.length > 0) {
-      filtered = filtered.filter(e => origCals.includes(e.originating_calendar));
+    // Event Category filter: OR between category-level and originating-calendar-level selections
+    if (categories.length > 0 || origCals.length > 0) {
+      filtered = filtered.filter(e =>
+        categories.includes(e.category) ||
+        (e.originating_calendar && origCals.includes(e.originating_calendar))
+      );
     }
 
-    // Sort
     if (sort === 'views') {
       filtered = [...filtered].sort((a, b) => (b.views ?? 0) - (a.views ?? 0));
     }
@@ -221,17 +219,17 @@ export default function Home() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, selectedOriginatingCalendars, sortBy);
+    applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, selectedCategories, selectedOriginatingCalendars, sortBy);
   };
 
   const handleDateFromChange = (newDate: string) => {
     setDateFrom(newDate);
-    applyFilters(allEvents, searchQuery, newDate, dateTo, selectedSources, selectedOriginatingCalendars, sortBy);
+    applyFilters(allEvents, searchQuery, newDate, dateTo, selectedSources, selectedCategories, selectedOriginatingCalendars, sortBy);
   };
 
   const handleDateToChange = (newDate: string) => {
     setDateTo(newDate);
-    applyFilters(allEvents, searchQuery, dateFrom, newDate, selectedSources, selectedOriginatingCalendars, sortBy);
+    applyFilters(allEvents, searchQuery, dateFrom, newDate, selectedSources, selectedCategories, selectedOriginatingCalendars, sortBy);
   };
 
   const handleSourceToggle = (source: string) => {
@@ -239,7 +237,15 @@ export default function Home() {
       ? selectedSources.filter(s => s !== source)
       : [...selectedSources, source];
     setSelectedSources(next);
-    applyFilters(allEvents, searchQuery, dateFrom, dateTo, next, selectedOriginatingCalendars, sortBy);
+    applyFilters(allEvents, searchQuery, dateFrom, dateTo, next, selectedCategories, selectedOriginatingCalendars, sortBy);
+  };
+
+  const handleCategoryToggle = (category: string) => {
+    const next = selectedCategories.includes(category)
+      ? selectedCategories.filter(c => c !== category)
+      : [...selectedCategories, category];
+    setSelectedCategories(next);
+    applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, next, selectedOriginatingCalendars, sortBy);
   };
 
   const handleOrigCalToggle = (cal: string) => {
@@ -247,17 +253,27 @@ export default function Home() {
       ? selectedOriginatingCalendars.filter(c => c !== cal)
       : [...selectedOriginatingCalendars, cal];
     setSelectedOriginatingCalendars(next);
-    applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, next, sortBy);
+    applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, selectedCategories, next, sortBy);
+  };
+
+  const toggleCategoryExpand = (category: string) => {
+    setExpandedCategories(prev => {
+      const next = new Set(prev);
+      if (next.has(category)) next.delete(category);
+      else next.add(category);
+      return next;
+    });
   };
 
   const handleClearFilters = () => {
     setDateFrom('');
     setDateTo('');
     setSelectedSources([]);
+    setSelectedCategories([]);
     setSelectedOriginatingCalendars([]);
     setSortBy('date');
     setSearchQuery('');
-    applyFilters(allEvents, '', '', '', [], [], 'date');
+    applyFilters(allEvents, '', '', '', [], [], [], 'date');
   };
 
   const handleScrape = async () => {
@@ -281,7 +297,6 @@ export default function Home() {
     }
   };
 
-  // Parse YYYY-MM-DD as local date (avoids UTC off-by-one)
   const parseLocalDate = (dateStr: string) => {
     const [year, month, day] = dateStr.split('-').map(Number);
     return new Date(year, month - 1, day);
@@ -299,12 +314,10 @@ export default function Home() {
     const sameDay = !event.end_date || event.end_date === event.start_date;
 
     if (!sameDay) {
-      // Multi-day event
       const dateRange = `${formatDate(event.start_date)} – ${formatDate(event.end_date)}`;
       return event.start_time ? `${dateRange}  ·  ${event.start_time}` : dateRange;
     }
 
-    // Single-day event
     const datePart = formatDate(event.start_date);
     if (!event.start_time) return `${datePart}  ·  All Day`;
     const timePart = event.end_time
@@ -312,6 +325,8 @@ export default function Home() {
       : event.start_time;
     return `${datePart}  ·  ${timePart}`;
   };
+
+  const categoryFilterCount = selectedCategories.length + selectedOriginatingCalendars.length;
 
   // ── Setup / loading screens ──────────────────────────────────────────────
   if (setupPhase === 'checking') {
@@ -455,7 +470,6 @@ export default function Home() {
 
           {/* Date Range + Sort By */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            {/* Start Date */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-sm font-medium text-gray-700">Start Date</label>
@@ -474,7 +488,6 @@ export default function Home() {
               />
             </div>
 
-            {/* End Date */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-sm font-medium text-gray-700">End Date</label>
@@ -493,7 +506,6 @@ export default function Home() {
               />
             </div>
 
-            {/* Sort By */}
             <div className="lg:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
               <select
@@ -501,7 +513,7 @@ export default function Home() {
                 onChange={(e) => {
                   const newSort = e.target.value as 'date' | 'views';
                   setSortBy(newSort);
-                  applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, selectedOriginatingCalendars, newSort);
+                  applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, selectedCategories, selectedOriginatingCalendars, newSort);
                 }}
                 disabled={searching || scraping}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
@@ -512,7 +524,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Event Host + Originating Calendar — checkbox lists */}
+          {/* Event Host + Event Category — checkbox filters */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             {/* Event Host */}
             {uniqueSources.length > 0 && (
@@ -528,7 +540,7 @@ export default function Home() {
                   </label>
                   {selectedSources.length > 0 && (
                     <button type="button"
-                      onClick={() => { setSelectedSources([]); applyFilters(allEvents, searchQuery, dateFrom, dateTo, [], selectedOriginatingCalendars, sortBy); }}
+                      onClick={() => { setSelectedSources([]); applyFilters(allEvents, searchQuery, dateFrom, dateTo, [], selectedCategories, selectedOriginatingCalendars, sortBy); }}
                       className="text-xs text-gray-400 hover:text-red-500">
                       Clear ×
                     </button>
@@ -553,48 +565,92 @@ export default function Home() {
               </div>
             )}
 
-            {/* Originating Calendar */}
-            {uniqueOriginatingCalendars.length > 0 && (
+            {/* Event Category (hierarchical) */}
+            {Object.keys(categoryCalendars).length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-sm font-medium text-gray-700">
-                    Originating Calendar
-                    {selectedOriginatingCalendars.length > 0 && (
+                    Event Category
+                    {categoryFilterCount > 0 && (
                       <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                        {selectedOriginatingCalendars.length} selected
+                        {categoryFilterCount} selected
                       </span>
                     )}
                   </label>
-                  {selectedOriginatingCalendars.length > 0 && (
+                  {categoryFilterCount > 0 && (
                     <button type="button"
-                      onClick={() => { setSelectedOriginatingCalendars([]); applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, [], sortBy); }}
+                      onClick={() => {
+                        setSelectedCategories([]);
+                        setSelectedOriginatingCalendars([]);
+                        applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, [], [], sortBy);
+                      }}
                       className="text-xs text-gray-400 hover:text-red-500">
                       Clear ×
                     </button>
                   )}
                 </div>
-                <div className="border border-gray-300 rounded-md max-h-44 overflow-y-auto bg-white divide-y divide-gray-100">
-                  {uniqueOriginatingCalendars.map(cal => (
-                    <label key={cal}
-                      className={`flex items-center gap-3 px-3 py-2 cursor-pointer text-sm select-none transition-colors ${selectedOriginatingCalendars.includes(cal) ? 'bg-blue-50 text-blue-800' : 'hover:bg-gray-50 text-gray-800'}`}>
-                      <input
-                        type="checkbox"
-                        checked={selectedOriginatingCalendars.includes(cal)}
-                        onChange={() => handleOrigCalToggle(cal)}
-                        disabled={searching || scraping}
-                        className="accent-blue-600 w-4 h-4 shrink-0"
-                      />
-                      {cal}
-                    </label>
-                  ))}
+                <div className="border border-gray-300 rounded-md max-h-64 overflow-y-auto bg-white divide-y divide-gray-100">
+                  {Object.keys(categoryCalendars).sort().map(cat => {
+                    const cals = categoryCalendars[cat];
+                    const isExpanded = expandedCategories.has(cat);
+                    const catChecked = selectedCategories.includes(cat);
+
+                    return (
+                      <div key={cat}>
+                        {/* Primary row */}
+                        <div className={`flex items-center gap-2 px-3 py-2 ${catChecked ? 'bg-blue-50' : 'hover:bg-gray-50'}`}>
+                          <input
+                            type="checkbox"
+                            checked={catChecked}
+                            onChange={() => handleCategoryToggle(cat)}
+                            disabled={searching || scraping}
+                            className="accent-blue-600 w-4 h-4 shrink-0"
+                          />
+                          <span
+                            className={`flex-1 text-sm cursor-pointer select-none ${catChecked ? 'text-blue-800 font-medium' : 'text-gray-800'}`}
+                            onClick={() => handleCategoryToggle(cat)}
+                          >
+                            {cat}
+                          </span>
+                          {cals.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => toggleCategoryExpand(cat)}
+                              className="text-gray-400 hover:text-gray-600 w-5 h-5 flex items-center justify-center rounded text-xs shrink-0"
+                            >
+                              {isExpanded ? '▼' : '▶'}
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Secondary rows — originating calendars */}
+                        {isExpanded && cals.map(cal => {
+                          const calChecked = selectedOriginatingCalendars.includes(cal);
+                          return (
+                            <label key={cal}
+                              className={`flex items-center gap-3 pl-9 pr-3 py-1.5 cursor-pointer text-sm select-none transition-colors border-t border-gray-50 ${calChecked ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-500'}`}>
+                              <input
+                                type="checkbox"
+                                checked={calChecked}
+                                onChange={() => handleOrigCalToggle(cal)}
+                                disabled={searching || scraping}
+                                className="accent-blue-600 w-4 h-4 shrink-0"
+                              />
+                              {cal}
+                            </label>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
                 </div>
-                <p className="text-xs text-gray-400 mt-1">Check one or more calendars to filter</p>
+                <p className="text-xs text-gray-400 mt-1">Select a category or expand ▶ to filter by specific calendar</p>
               </div>
             )}
           </div>
 
           {/* Clear Filters Button */}
-          {(dateFrom || dateTo || selectedSources.length > 0 || selectedOriginatingCalendars.length > 0 || sortBy !== 'date' || searchQuery) && (
+          {(dateFrom || dateTo || selectedSources.length > 0 || categoryFilterCount > 0 || sortBy !== 'date' || searchQuery) && (
             <div className="mb-6">
               <button
                 type="button"
@@ -628,7 +684,7 @@ export default function Home() {
               <p>
                 Showing <span className="font-semibold text-gray-900">{events.length}</span> of{' '}
                 <span className="font-semibold text-gray-900">{allEvents.length}</span> events
-                {(dateFrom || dateTo || selectedSources.length > 0 || searchQuery) && (
+                {(dateFrom || dateTo || selectedSources.length > 0 || categoryFilterCount > 0 || searchQuery) && (
                   <span className="block mt-2">
                     Filters active:{' '}
                     {[
@@ -636,6 +692,7 @@ export default function Home() {
                       dateFrom && `From ${dateFrom}`,
                       dateTo && `To ${dateTo}`,
                       selectedSources.length > 0 && `${selectedSources.length} host(s)`,
+                      selectedCategories.length > 0 && `${selectedCategories.length} categor${selectedCategories.length === 1 ? 'y' : 'ies'}`,
                       selectedOriginatingCalendars.length > 0 && `${selectedOriginatingCalendars.length} calendar(s)`,
                       sortBy === 'views' && 'Sorted by views',
                     ].filter(Boolean).join(', ')}
@@ -649,7 +706,6 @@ export default function Home() {
               events.map((event) => (
                 <Link key={event.id} href={`/events/${event.id}`}>
                   <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer">
-                    {/* Title row — full width */}
                     <div className="flex justify-between items-start gap-3 mb-3">
                       <h3 className="text-lg font-semibold text-gray-900 leading-snug">{event.title}</h3>
                       <span className="shrink-0 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded whitespace-nowrap">
@@ -657,7 +713,6 @@ export default function Home() {
                       </span>
                     </div>
 
-                    {/* Date + time */}
                     <div className="flex items-center gap-2 text-sm text-gray-700 mb-1">
                       <svg className="w-4 h-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -668,7 +723,6 @@ export default function Home() {
                       <span className="font-medium">{formatTimeRange(event)}</span>
                     </div>
 
-                    {/* Location */}
                     {event.location && (
                       <div className="flex items-center gap-2 text-sm text-gray-700 mb-1">
                         <svg className="w-4 h-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -679,12 +733,10 @@ export default function Home() {
                       </div>
                     )}
 
-                    {/* Description */}
                     {event.description && (
                       <p className="text-sm text-gray-500 mt-2 mb-3 line-clamp-2">{event.description}</p>
                     )}
 
-                    {/* Footer */}
                     <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
                       <span className="text-xs text-gray-400">{event.source_name}</span>
                       <span className="text-sm text-blue-600 hover:text-blue-800 font-medium">View Details →</span>
