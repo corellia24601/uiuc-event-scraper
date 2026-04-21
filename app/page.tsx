@@ -148,12 +148,12 @@ export default function Home() {
       const sources = Array.from(new Set(eventArray.map((e: Event) => e.source_name))).sort() as string[];
       setUniqueSources(sources);
 
-      // Build category → originating calendars map for hierarchical Event Category filter
+      // Build category → source names map for hierarchical Event Category filter
       const catCals: Record<string, string[]> = {};
       for (const e of eventArray as Event[]) {
         if (!catCals[e.category]) catCals[e.category] = [];
-        if (e.originating_calendar && !catCals[e.category].includes(e.originating_calendar)) {
-          catCals[e.category].push(e.originating_calendar);
+        if (e.source_name && !catCals[e.category].includes(e.source_name)) {
+          catCals[e.category].push(e.source_name);
         }
       }
       for (const cat in catCals) catCals[cat].sort();
@@ -202,11 +202,11 @@ export default function Home() {
       filtered = filtered.filter(e => sources.includes(e.source_name));
     }
 
-    // Event Category filter: OR between category-level and originating-calendar-level selections
+    // Event Category filter: OR between category-level and source-level selections
     if (categories.length > 0 || origCals.length > 0) {
       filtered = filtered.filter(e =>
         categories.includes(e.category) ||
-        (e.originating_calendar && origCals.includes(e.originating_calendar))
+        origCals.includes(e.source_name)
       );
     }
 
@@ -644,7 +644,7 @@ export default function Home() {
                     );
                   })}
                 </div>
-                <p className="text-xs text-gray-400 mt-1">Select a category or expand ▶ to filter by specific calendar</p>
+                <p className="text-xs text-gray-400 mt-1">Select a category or expand ▶ to filter by specific source</p>
               </div>
             )}
           </div>
