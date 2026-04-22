@@ -3,6 +3,17 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
+const COLLEGE_MERGE_RULES: { label: string; match: (n: string) => boolean }[] = [
+  { label: 'ACES',         match: (n) => n.includes('ACES') },
+  { label: 'Business',     match: (n) => n.includes('Business') || n.includes('Gies') },
+  { label: 'Engineering',  match: (n) => n.includes('Engineering') },
+  { label: 'LAS',          match: (n) => n.includes('LAS') },
+  { label: 'Mathematics',  match: (n) => n.includes('Mathematics') },
+  { label: 'Medicine',     match: (n) => n.includes('Medicine') },
+  { label: 'Physics',      match: (n) => n.includes('Physics') },
+  { label: 'Social Work',  match: (n) => n.includes('Social Work') },
+];
+
 interface Event {
   id: number;
   title: string;
@@ -48,6 +59,7 @@ export default function Home() {
   const [selectedOriginatingCalendars, setSelectedOriginatingCalendars] = useState<string[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [categoryCalendars, setCategoryCalendars] = useState<Record<string, string[]>>({});
+  const [displayToSources, setDisplayToSources] = useState<Map<string, string[]>>(new Map());
   const [sortBy, setSortBy] = useState<'date' | 'views'>('date');
 
   const [setupPhase, setSetupPhase] = useState<SetupPhase>('checking');
@@ -174,6 +186,32 @@ export default function Home() {
         catMap[s.category].push(s.name);
       }
       for (const cat in catMap) catMap[cat].sort();
+
+      // Build display-label → real source names map, applying merge rules for Colleges & Schools
+      const dtSources = new Map<string, string[]>();
+      for (const cat in catMap) {
+        if (cat === 'Colleges & Schools') {
+          const used = new Set<string>();
+          const mergedEntries = new Map<string, string[]>();
+          for (const rule of COLLEGE_MERGE_RULES) {
+            const matching = catMap[cat].filter(rule.match);
+            if (matching.length > 0) {
+              mergedEntries.set(rule.label, matching);
+              matching.forEach(n => used.add(n));
+            }
+          }
+          // Unmerged sources keep their own name
+          for (const name of catMap[cat]) {
+            if (!used.has(name)) mergedEntries.set(name, [name]);
+          }
+          catMap[cat] = Array.from(mergedEntries.keys()).sort();
+          for (const [label, names] of mergedEntries) dtSources.set(label, names);
+        } else {
+          for (const name of catMap[cat]) dtSources.set(name, [name]);
+        }
+      }
+
+      setDisplayToSources(dtSources);
       setCategoryCalendars(catMap);
     } catch (e) {
       console.error('Error fetching sources:', e);
@@ -212,11 +250,17 @@ export default function Home() {
       filtered = filtered.filter(e => sources.includes(e.source_name));
     }
 
-    // Event Category filter: OR between category-level and source-level selections
+    // Event Category filter: expand merged display labels to real source names, then OR
     if (categories.length > 0 || origCals.length > 0) {
+      const sourceNamesSet = new Set<string>();
+      for (const label of origCals) {
+        const names = displayToSources.get(label);
+        if (names) names.forEach(n => sourceNamesSet.add(n));
+        else sourceNamesSet.add(label);
+      }
       filtered = filtered.filter(e =>
         categories.includes(e.category) ||
-        origCals.includes(e.source_name)
+        sourceNamesSet.has(e.source_name)
       );
     }
 
