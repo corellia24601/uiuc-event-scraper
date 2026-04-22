@@ -542,8 +542,11 @@ export default function Home() {
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-sm font-medium text-gray-700">
                     Event Host
+                    <span className="ml-2 text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                      {uniqueSources.length}
+                    </span>
                     {selectedSources.length > 0 && (
-                      <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                      <span className="ml-1 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
                         {selectedSources.length} selected
                       </span>
                     )}
@@ -556,7 +559,7 @@ export default function Home() {
                     </button>
                   )}
                 </div>
-                <div className="border border-gray-300 rounded-md max-h-44 overflow-y-auto bg-white divide-y divide-gray-100">
+                <div className="border border-gray-300 rounded-md max-h-64 overflow-y-auto bg-white divide-y divide-gray-100">
                   {uniqueSources.map(source => (
                     <label key={source}
                       className={`flex items-center gap-3 px-3 py-2 cursor-pointer text-sm select-none transition-colors ${selectedSources.includes(source) ? 'bg-blue-50 text-blue-800' : 'hover:bg-gray-50 text-gray-800'}`}>
@@ -580,9 +583,12 @@ export default function Home() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-sm font-medium text-gray-700">
-                    Event Category
+                    Category
+                    <span className="ml-2 text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                      {Object.values(categoryCalendars).reduce((sum, arr) => sum + arr.length, 0)}
+                    </span>
                     {categoryFilterCount > 0 && (
-                      <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                      <span className="ml-1 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
                         {categoryFilterCount} selected
                       </span>
                     )}
@@ -617,10 +623,15 @@ export default function Home() {
                             className="accent-blue-600 w-4 h-4 shrink-0"
                           />
                           <span
-                            className={`flex-1 text-sm cursor-pointer select-none ${catChecked ? 'text-blue-800 font-medium' : 'text-gray-800'}`}
+                            className={`flex-1 text-sm cursor-pointer select-none flex items-center gap-1.5 ${catChecked ? 'text-blue-800 font-medium' : 'text-gray-800'}`}
                             onClick={() => handleCategoryToggle(cat)}
                           >
                             {cat}
+                            {cals.length > 0 && (
+                              <span className="text-xs bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded-full font-normal">
+                                {cals.length}
+                              </span>
+                            )}
                           </span>
                           {cals.length > 0 && (
                             <button
