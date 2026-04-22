@@ -8,7 +8,7 @@ A Next.js web app that aggregates upcoming events from 300+ UIUC sources into on
 
 ## Features
 
-- **300+ active sources** — central calendars, colleges, arts venues, research centers, athletics, libraries, and more
+- **950+ active sources** — central calendars, colleges, departments, student organizations, research centers, arts venues, athletics, libraries, and more
 - **Semantic search** — powered by Cohere embeddings; finds events related to your query even when the exact words don't appear in the title or description
 - **Multi-term keyword search** — exact phrase, per-word, prefix, and fuzzy (Levenshtein) matching with relevance scoring
 - **Sort by date or relevance** — relevance sort blends semantic similarity (60%) and keyword score (40%)
@@ -107,7 +107,7 @@ app/
   lib/
     db.ts                # Flat-file JSON database (data.json)
     scraper.ts           # All scrapers + deduplication + embedding trigger
-    sources.ts           # Initial source pool (50 sources, 25 active)
+    sources.ts           # Initial source pool (~959 sources, 958 active)
     embeddings.ts        # Cohere embedding helpers (build, query, cosine similarity)
   api/
     events/              # GET /api/events, GET /api/events/[id]
@@ -121,16 +121,40 @@ app/
 instrumentation.node.ts  # Startup + hourly scrape timer (Node.js only)
 ```
 
+### Source Pool
+
+~959 sources across 11 categories (958 active):
+
+| Category | Sources |
+|---|---|
+| Other UIUC Calendars | 494 |
+| Colleges & Schools | 214 |
+| Student Life & Cultural Centers | 75 |
+| Research Centers & Labs | 67 |
+| Campus Recreation & Wellness | 35 |
+| Graduate & Academic Support | 26 |
+| Arts & Performance | 21 |
+| Libraries | 11 |
+| Athletics | 9 |
+| Central Calendars | 4 |
+| Design & Innovation | 3 |
+
 ### Scraper Parsers
 
-| Parser | Sites |
-|---|---|
-| UIUC Calendar (`calendars.illinois.edu`) | 20+ sources via the campus calendar system |
-| Illinois WordPress Theme | music.illinois.edu, faa.illinois.edu |
-| Drupal Event Articles | giesbusiness.illinois.edu, education.illinois.edu |
-| Krannert Center | krannertcenter.com (fetches detail pages for venue/time) |
-| Beckman Institute | beckman.illinois.edu (Playwright — Angular app) |
-| Krannert Art Museum | kam.illinois.edu (Playwright — JS-rendered Drupal) |
+| Parser | Detected by | Used for |
+|---|---|---|
+| **UIUC Calendar** | `calendars.illinois.edu` URL | ~700+ sources routed through the campus calendar system |
+| **Illinois WordPress Theme** | `event-card-content__date` or `featured-event__date` CSS class | music.illinois.edu, faa.illinois.edu, and similar WP sites |
+| **Drupal Event Articles** | `class="event-date"` + `/event/YYYY/MM/DD/` URL pattern | giesbusiness.illinois.edu, education.illinois.edu |
+| **Krannert Center** | `krannertcenter.com/calendar` URL | Fetches detail pages for venue and performance times |
+| **iCal / LibCal** | `libcal.library.illinois.edu/ical` URL | Library event feeds |
+| **RSS Feed** | `.rss` or `feed=rss` URL pattern | Department news/event RSS feeds |
+| **Grainger** | `grainger.illinois.edu/calendars` URL | Engineering college event listings |
+| **iSchool** | `ischool.illinois.edu/news-events/events` URL | Scrapes 12 months automatically |
+| **State Farm Center** | `statefarmcenter.com/events` URL | Major venue — static HTML listing |
+| **Spurlock Museum** | `spurlock.illinois.edu/events` URL | Museum programs and exhibitions |
+| **Beckman Institute** | `beckman.illinois.edu/visit/events` URL | Playwright (headless Chromium) — Angular app |
+| **Krannert Art Museum** | `kam.illinois.edu` URL | Playwright (headless Chromium) — JS-rendered Drupal |
 
 ### Database
 
