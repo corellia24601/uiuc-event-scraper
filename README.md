@@ -1,6 +1,6 @@
 # UIUC Event Scraper
 
-A Next.js web app that aggregates upcoming events from 30+ UIUC sources into one searchable, filterable feed. Events are scraped automatically on startup and refreshed every hour.
+A Next.js web app that aggregates upcoming events from 25+ UIUC sources into one searchable, filterable feed. Events are scraped automatically on startup and refreshed every hour.
 
 **Live demo:** *(add your Railway URL here once deployed)*
 
@@ -8,12 +8,16 @@ A Next.js web app that aggregates upcoming events from 30+ UIUC sources into one
 
 ## Features
 
-- **30+ active sources** — central calendars, colleges, arts venues, research centers, athletics, libraries, and more
-- **Full-text search** across title and description
-- **Filters** — date range, event host, originating calendar; sort by date or popularity
+- **25 active sources** — central calendars, colleges, arts venues, research centers, athletics, libraries, and more
+- **Semantic search** — powered by Cohere embeddings; finds events related to your query even when the exact words don't appear in the title or description
+- **Multi-term keyword search** — exact phrase, per-word, prefix, and fuzzy (Levenshtein) matching with relevance scoring
+- **Sort by date or relevance** — relevance sort blends semantic similarity (60%) and keyword score (40%)
+- **Hierarchical Category filter** — primary level = source category (e.g. Colleges & Schools, Arts & Culture); secondary level = individual sources within that category
+- **Event Host filter** — filter by originating website
+- **Date range filter**
 - **Cross-source deduplication** — the same event appearing on multiple sites is merged into one card, with links to all original pages
 - **Auto-scrape** — runs 3 seconds after server start, then every hour
-- **Source pool management** — add, edit, enable/disable sources at `/sources`
+- **Source pool management** — add, edit, enable/disable, or permanently delete sources at `/sources`
 - **Playwright browser rendering** — Beckman Institute and Krannert Art Museum use a headless Chromium browser to scrape JavaScript-rendered pages
 
 ---
@@ -23,6 +27,7 @@ A Next.js web app that aggregates upcoming events from 30+ UIUC sources into one
 ### Prerequisites
 - Node.js 20+
 - npm
+- (Optional) A [Cohere](https://cohere.com) API key for semantic search
 
 ### Setup
 
@@ -42,7 +47,8 @@ On first run the source pool is empty — click **Initialize Sources** to popula
 
 | Variable | Default | Description |
 |---|---|---|
-| `DATA_DIR` | project root | Directory where `data.json` is stored. Set to a persistent volume path in production. |
+| `DATA_DIR` | project root | Directory where `data.json` and `embeddings.json` are stored. Set to a persistent volume path in production. |
+| `COHERE_API_KEY` | *(none)* | Enables semantic search. Get a free key at [cohere.com](https://cohere.com). If unset, semantic search is silently skipped and only keyword search is used. |
 
 Copy `.env.example` to `.env.local` and edit as needed for local overrides.
 
@@ -51,15 +57,21 @@ Copy `.env.example` to `.env.local` and edit as needed for local overrides.
 ## Deployment (Railway — recommended)
 
 Railway runs the app as a persistent Node.js process, which means:
-- `data.json` can be stored on a persistent **Volume** (survives redeploys)
+- `data.json` and `embeddings.json` can be stored on a persistent **Volume** (survives redeploys)
 - Playwright/Chromium works (no serverless size limits)
-- The hourly scrape timer in `instrumentation.ts` runs continuously
+- The hourly scrape timer in `instrumentation.node.ts` runs continuously
 
 ### Steps
 
 1. **Create a Railway account** at [railway.app](https://railway.app) (free tier available)
 
-2. **New project → Deploy from GitHub repo** — connect your fork of this repo
+2. **Deploy via Railway CLI** (recommended — GitHub webhook auto-deploy requires additional setup):
+   ```bash
+   npm install -g @railway/cli
+   railway login
+   railway init
+   railway up --detach
+   ```
 
 3. **Add a Volume** so scraped data survives redeploys:
    - In your Railway service → **Volumes** → Add Volume
@@ -68,6 +80,7 @@ Railway runs the app as a persistent Node.js process, which means:
 4. **Set environment variables** in Railway → **Variables**:
    ```
    DATA_DIR=/data
+   COHERE_API_KEY=your-key-here
    ```
 
 5. Railway will automatically use the build command from `railway.toml`:
@@ -78,7 +91,12 @@ Railway runs the app as a persistent Node.js process, which means:
 
 6. Once deployed, open the Railway URL, click **Initialize Sources**, then **Scrape Events**.
 
-> **Note:** The first scrape takes 3–5 minutes because it fetches a detail page for every UIUC Calendar event to extract descriptions and accurate end dates.
+> **Note:** The first scrape takes 3–5 minutes. After scraping completes, embeddings are built automatically if `COHERE_API_KEY` is set (batched Cohere API calls, ~90 events per request).
+
+To redeploy after code changes:
+```bash
+railway up --detach
+```
 
 ---
 
@@ -87,17 +105,20 @@ Railway runs the app as a persistent Node.js process, which means:
 ```
 app/
   lib/
-    db.ts          # Flat-file JSON database (data.json)
-    scraper.ts     # All scrapers + cross-source deduplication
-    sources.ts     # Initial source pool (50 sources, 30 active)
+    db.ts                # Flat-file JSON database (data.json)
+    scraper.ts           # All scrapers + deduplication + embedding trigger
+    sources.ts           # Initial source pool (50 sources, 25 active)
+    embeddings.ts        # Cohere embedding helpers (build, query, cosine similarity)
   api/
-    events/        # GET /api/events, GET /api/events/[id]
-    scrape/        # POST /api/scrape
-    sources/       # GET/POST /api/sources, PATCH/DELETE /api/sources/[id]
-  page.tsx         # Main events feed
-  events/[id]/     # Event detail page
-  sources/         # Source pool management page
-instrumentation.ts # Startup + hourly scrape timer
+    events/              # GET /api/events, GET /api/events/[id]
+    scrape/              # POST /api/scrape
+    search/              # GET /api/search?q=... (semantic search)
+    sources/             # GET/POST /api/sources, PATCH/DELETE /api/sources/[id]
+    setup/               # POST /api/setup (seed source pool)
+  page.tsx               # Main events feed
+  events/[id]/           # Event detail page
+  sources/               # Source pool management page
+instrumentation.node.ts  # Startup + hourly scrape timer (Node.js only)
 ```
 
 ### Scraper Parsers
@@ -113,12 +134,33 @@ instrumentation.ts # Startup + hourly scrape timer
 
 ### Database
 
-`data.json` is a plain JSON file:
-```json
-{ "sources": [...], "events": [...] }
-```
+Two flat files are used for persistence:
+
+- **`data.json`** — sources, scraped events, and permanent deletion blacklist:
+  ```json
+  { "sources": [...], "events": [...], "permanently_deleted_ids": [...] }
+  ```
+- **`embeddings.json`** — Cohere vector embeddings keyed by event ID:
+  ```json
+  { "42": [0.12, -0.04, ...], "43": [...] }
+  ```
 
 No migrations or setup required. To reset all scraped events, delete `data.json` and restart.
+
+### Semantic Search
+
+After each scrape, all events are batch-embedded using Cohere's `embed-english-light-v3.0` model and stored in `embeddings.json`. When a user searches:
+
+1. The query is embedded via `/api/search`
+2. Cosine similarity is computed against all upcoming event embeddings
+3. Events scoring ≥ 0.3 are included as semantic matches
+4. The frontend blends semantic score (60%) + keyword score (40%) for the **Relevance** sort
+
+If `COHERE_API_KEY` is not set, semantic search is silently skipped and only keyword search runs.
+
+### Source Deletion
+
+Sources can be **permanently deleted** from `/sources`. Permanently deleted source IDs are stored in `permanently_deleted_ids` inside `data.json` and are excluded from the auto-seed step on every restart, so they will not reappear.
 
 ---
 
