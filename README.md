@@ -8,7 +8,7 @@ A Next.js web app that aggregates upcoming events from 25+ UIUC sources into one
 
 ## Features
 
-- **25 active sources** — central calendars, colleges, arts venues, research centers, athletics, libraries, and more
+- **300+ active sources** — central calendars, colleges, arts venues, research centers, athletics, libraries, and more
 - **Semantic search** — powered by Cohere embeddings; finds events related to your query even when the exact words don't appear in the title or description
 - **Multi-term keyword search** — exact phrase, per-word, prefix, and fuzzy (Levenshtein) matching with relevance scoring
 - **Sort by date or relevance** — relevance sort blends semantic similarity (60%) and keyword score (40%)
