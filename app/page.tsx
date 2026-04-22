@@ -123,6 +123,8 @@ export default function Home() {
   const [categoryCalendars, setCategoryCalendars] = useState<Record<string, string[]>>({});
   const [displayToSources, setDisplayToSources] = useState<Map<string, string[]>>(new Map());
   const [sortBy, setSortBy] = useState<'date' | 'views' | 'relevance'>('date');
+  const [semanticScores, setSemanticScores] = useState<Map<number, number>>(new Map());
+  const [semanticReady, setSemanticReady] = useState(false);
 
   const [setupPhase, setSetupPhase] = useState<SetupPhase>('checking');
   const [initProgress, setInitProgress] = useState(0);
@@ -296,11 +298,18 @@ export default function Home() {
     if (search.trim()) {
       const queryLower = search.trim().toLowerCase();
       const terms = queryLower.split(/\s+/).filter(t => t.length >= 2);
-      const scored = filtered
-        .map(e => ({ event: e, score: scoreEvent(e, terms, queryLower) }))
-        .filter(r => r.score > 0);
+
+      const scored = filtered.map(e => {
+        const kw = scoreEvent(e, terms, queryLower);
+        const sem = semanticScores.get(e.id) ?? 0;
+        // Normalise keyword score to 0–1 (cap at 300), blend 40% kw + 60% semantic
+        const kwNorm = Math.min(kw, 300) / 300;
+        const combined = sem * 60 + kwNorm * 40;
+        return { event: e, kw, sem, combined };
+      }).filter(r => r.kw > 0 || r.sem >= 0.3);  // include if keyword OR semantic match
+
       filtered = scored.map(r => r.event);
-      relevanceScores = new Map(scored.map(r => [r.event.id, r.score]));
+      relevanceScores = new Map(scored.map(r => [r.event.id, r.combined]));
     }
 
     if (from || to) {
@@ -342,9 +351,35 @@ export default function Home() {
     setEvents(filtered);
   };
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, selectedCategories, selectedOriginatingCalendars, sortBy);
+    const q = searchQuery.trim();
+
+    if (!q) {
+      setSemanticScores(new Map());
+      setSemanticReady(false);
+      applyFilters(allEvents, '', dateFrom, dateTo, selectedSources, selectedCategories, selectedOriginatingCalendars, sortBy);
+      return;
+    }
+
+    setSearching(true);
+
+    // Fetch semantic scores from Cohere in parallel with keyword filtering
+    let semScores = new Map<number, number>();
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+      if (res.ok) {
+        const data = await res.json() as { id: number; score: number }[];
+        semScores = new Map(data.map(r => [r.id, r.score]));
+      }
+    } catch {
+      // Non-fatal: fall back to keyword-only
+    }
+
+    setSemanticScores(semScores);
+    setSemanticReady(true);
+    setSearching(false);
+    applyFilters(allEvents, q, dateFrom, dateTo, selectedSources, selectedCategories, selectedOriginatingCalendars, sortBy);
   };
 
   const handleDateFromChange = (newDate: string) => {

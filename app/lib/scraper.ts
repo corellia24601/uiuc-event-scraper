@@ -1318,6 +1318,16 @@ export async function runScrape(): Promise<{ total: number; errors: string[] }> 
   }
 
   await closeBrowser();
+
+  // ── Phase 5: build semantic embeddings ────────────────────────────────────
+  try {
+    const { buildEmbeddings } = await import('./embeddings');
+    const { getEvents } = await import('./db');
+    await buildEmbeddings(getEvents.all());
+  } catch (err) {
+    console.error('[Embeddings] Build failed (non-fatal):', err);
+  }
+
   scrapeState.running = false;
   scrapeState.currentSource = '';
   scrapeState.completedAt = Date.now();
