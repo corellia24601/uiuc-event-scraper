@@ -66,6 +66,7 @@ export default function Home() {
         if (status.eventCount > 0 && !status.scrape.running) {
           setSetupPhase('ready');
           fetchEvents('');
+          fetchSources();
           return;
         }
 
@@ -99,6 +100,7 @@ export default function Home() {
       } catch {
         setSetupPhase('ready');
         fetchEvents('');
+        fetchSources();
       }
     }
 
@@ -113,6 +115,7 @@ export default function Home() {
             pollRef.current = null;
             setSetupPhase('ready');
             fetchEvents('');
+            fetchSources();
           }
         } catch { /* ignore transient errors */ }
       }, 1500);
@@ -148,17 +151,6 @@ export default function Home() {
       const sources = Array.from(new Set(eventArray.map((e: Event) => e.source_name))).sort() as string[];
       setUniqueSources(sources);
 
-      // Build category → source names map for hierarchical Event Category filter
-      const catCals: Record<string, string[]> = {};
-      for (const e of eventArray as Event[]) {
-        if (!catCals[e.category]) catCals[e.category] = [];
-        if (e.source_name && !catCals[e.category].includes(e.source_name)) {
-          catCals[e.category].push(e.source_name);
-        }
-      }
-      for (const cat in catCals) catCals[cat].sort();
-      setCategoryCalendars(catCals);
-
       applyFilters(eventArray, searchQuery, dateFrom, dateTo, selectedSources, selectedCategories, selectedOriginatingCalendars, sortBy);
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -167,6 +159,24 @@ export default function Home() {
     } finally {
       setLoading(false);
       setSearching(false);
+    }
+  };
+
+  const fetchSources = async () => {
+    try {
+      const res = await fetch('/api/sources');
+      if (!res.ok) return;
+      const sources: { category: string; name: string; active: boolean }[] = await res.json();
+      const catMap: Record<string, string[]> = {};
+      for (const s of sources) {
+        if (!s.active) continue;
+        if (!catMap[s.category]) catMap[s.category] = [];
+        catMap[s.category].push(s.name);
+      }
+      for (const cat in catMap) catMap[cat].sort();
+      setCategoryCalendars(catMap);
+    } catch (e) {
+      console.error('Error fetching sources:', e);
     }
   };
 
