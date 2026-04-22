@@ -1,6 +1,6 @@
 # UIUC Event Scraper
 
-A Next.js web app that aggregates upcoming events from 25+ UIUC sources into one searchable, filterable feed. Events are scraped automatically on startup and refreshed every hour.
+A Next.js web app that aggregates upcoming events from 300+ UIUC sources into one searchable, filterable feed. Events are scraped automatically on startup and refreshed every hour.
 
 **Live demo:** *(add your Railway URL here once deployed)*
 
