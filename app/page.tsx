@@ -3,6 +3,68 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
+// ── Search scoring ────────────────────────────────────────────────────────────
+
+function levenshtein(a: string, b: string): number {
+  if (Math.abs(a.length - b.length) > 3) return 99;
+  const prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  const curr = new Array(b.length + 1);
+  for (let i = 1; i <= a.length; i++) {
+    curr[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      curr[j] = a[i - 1] === b[j - 1]
+        ? prev[j - 1]
+        : 1 + Math.min(prev[j], curr[j - 1], prev[j - 1]);
+    }
+    for (let j = 0; j <= b.length; j++) prev[j] = curr[j];
+  }
+  return prev[b.length];
+}
+
+function scoreEvent(event: Event, terms: string[], queryLower: string): number {
+  const title = event.title.toLowerCase();
+  const desc = (event.description || '').toLowerCase();
+  let score = 0;
+
+  // Exact full phrase
+  if (title.includes(queryLower)) score += 200;
+  else if (desc.includes(queryLower)) score += 60;
+
+  const titleWords = title.split(/\W+/).filter(Boolean);
+  const descWords = desc.split(/\W+/).filter(Boolean);
+  let titleHits = 0, anyHits = 0;
+
+  for (const term of terms) {
+    const maxDist = term.length >= 8 ? 2 : term.length >= 5 ? 1 : 0;
+    let inTitle = false, hit = false;
+
+    if (title.includes(term)) {
+      score += 40; inTitle = true; hit = true;
+    } else if (desc.includes(term)) {
+      score += 10; hit = true;
+    } else if (titleWords.some(w => w.startsWith(term) || (term.length >= 4 && term.startsWith(w) && w.length >= 4))) {
+      score += 20; inTitle = true; hit = true;
+    } else if (descWords.some(w => w.startsWith(term) || (term.length >= 4 && term.startsWith(w) && w.length >= 4))) {
+      score += 5; hit = true;
+    } else if (maxDist > 0) {
+      if (titleWords.some(w => levenshtein(w, term) <= maxDist)) { score += 15; inTitle = true; hit = true; }
+      else if (descWords.some(w => levenshtein(w, term) <= maxDist)) { score += 3; hit = true; }
+    }
+
+    if (inTitle) titleHits++;
+    if (hit) anyHits++;
+  }
+
+  if (terms.length > 1) {
+    if (titleHits === terms.length) score += 60;
+    else if (anyHits === terms.length) score += 20;
+  }
+
+  return score;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 const COLLEGE_MERGE_RULES: { label: string; match: (n: string) => boolean }[] = [
   { label: 'ACES',         match: (n) => n.includes('ACES') },
   { label: 'Business',     match: (n) => n.includes('Business') || n.includes('Gies') },
@@ -60,7 +122,7 @@ export default function Home() {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [categoryCalendars, setCategoryCalendars] = useState<Record<string, string[]>>({});
   const [displayToSources, setDisplayToSources] = useState<Map<string, string[]>>(new Map());
-  const [sortBy, setSortBy] = useState<'date' | 'views'>('date');
+  const [sortBy, setSortBy] = useState<'date' | 'views' | 'relevance'>('date');
 
   const [setupPhase, setSetupPhase] = useState<SetupPhase>('checking');
   const [initProgress, setInitProgress] = useState(0);
@@ -226,15 +288,19 @@ export default function Home() {
     sources: string[],
     categories: string[],
     origCals: string[],
-    sort: 'date' | 'views'
+    sort: 'date' | 'views' | 'relevance'
   ) => {
     let filtered = eventsToFilter;
+    let relevanceScores: Map<number, number> | null = null;
 
     if (search.trim()) {
-      const query = search.toLowerCase();
-      filtered = filtered.filter(
-        e => e.title.toLowerCase().includes(query) || e.description.toLowerCase().includes(query)
-      );
+      const queryLower = search.trim().toLowerCase();
+      const terms = queryLower.split(/\s+/).filter(t => t.length >= 2);
+      const scored = filtered
+        .map(e => ({ event: e, score: scoreEvent(e, terms, queryLower) }))
+        .filter(r => r.score > 0);
+      filtered = scored.map(r => r.event);
+      relevanceScores = new Map(scored.map(r => [r.event.id, r.score]));
     }
 
     if (from || to) {
@@ -264,7 +330,12 @@ export default function Home() {
       );
     }
 
-    if (sort === 'views') {
+    if (sort === 'relevance' && relevanceScores) {
+      filtered = [...filtered].sort((a, b) =>
+        (relevanceScores!.get(b.id) ?? 0) - (relevanceScores!.get(a.id) ?? 0) ||
+        a.start_date.localeCompare(b.start_date)
+      );
+    } else if (sort === 'views') {
       filtered = [...filtered].sort((a, b) => (b.views ?? 0) - (a.views ?? 0));
     }
 
@@ -328,6 +399,7 @@ export default function Home() {
     setSortBy('date');
     setSearchQuery('');
     applyFilters(allEvents, '', '', '', [], [], [], 'date');
+    // 'relevance' option disappears when query is cleared — no stale sort state
   };
 
   const handleScrape = async () => {
@@ -565,7 +637,7 @@ export default function Home() {
               <select
                 value={sortBy}
                 onChange={(e) => {
-                  const newSort = e.target.value as 'date' | 'views';
+                  const newSort = e.target.value as 'date' | 'views' | 'relevance';
                   setSortBy(newSort);
                   applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, selectedCategories, selectedOriginatingCalendars, newSort);
                 }}
@@ -574,6 +646,7 @@ export default function Home() {
               >
                 <option value="date">Date (Earliest First)</option>
                 <option value="views">Views (Most Popular First)</option>
+                {searchQuery.trim() && <option value="relevance">Relevance</option>}
               </select>
             </div>
           </div>
