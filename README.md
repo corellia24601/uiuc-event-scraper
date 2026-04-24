@@ -2,7 +2,7 @@
 
 A Next.js web app that aggregates upcoming events from 900+ UIUC sources into one searchable, filterable feed. Events are scraped automatically on startup and refreshed every hour.
 
-**Live demo:** [*(add your Railway URL here once deployed)*](https://uiucevent.up.railway.app/)
+**Live demo:** https://uiucevent.up.railway.app/
 
 ---
 
