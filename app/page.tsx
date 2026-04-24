@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { sendGAEvent } from '@next/third-parties/google';
 
 // ── Search scoring ────────────────────────────────────────────────────────────
 
@@ -379,16 +380,19 @@ export default function Home() {
     setSemanticScores(semScores);
     setSemanticReady(true);
     setSearching(false);
+    sendGAEvent('event', 'search', { search_term: q, semantic_hits: semScores.size });
     applyFilters(allEvents, q, dateFrom, dateTo, selectedSources, selectedCategories, selectedOriginatingCalendars, sortBy);
   };
 
   const handleDateFromChange = (newDate: string) => {
     setDateFrom(newDate);
+    if (newDate) sendGAEvent('event', 'filter_date', { date_from: newDate });
     applyFilters(allEvents, searchQuery, newDate, dateTo, selectedSources, selectedCategories, selectedOriginatingCalendars, sortBy);
   };
 
   const handleDateToChange = (newDate: string) => {
     setDateTo(newDate);
+    if (newDate) sendGAEvent('event', 'filter_date', { date_to: newDate });
     applyFilters(allEvents, searchQuery, dateFrom, newDate, selectedSources, selectedCategories, selectedOriginatingCalendars, sortBy);
   };
 
@@ -396,6 +400,7 @@ export default function Home() {
     const next = selectedSources.includes(source)
       ? selectedSources.filter(s => s !== source)
       : [...selectedSources, source];
+    if (!selectedSources.includes(source)) sendGAEvent('event', 'filter_host', { host: source });
     setSelectedSources(next);
     applyFilters(allEvents, searchQuery, dateFrom, dateTo, next, selectedCategories, selectedOriginatingCalendars, sortBy);
   };
@@ -404,6 +409,7 @@ export default function Home() {
     const next = selectedCategories.includes(category)
       ? selectedCategories.filter(c => c !== category)
       : [...selectedCategories, category];
+    if (!selectedCategories.includes(category)) sendGAEvent('event', 'filter_category', { category });
     setSelectedCategories(next);
     applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, next, selectedOriginatingCalendars, sortBy);
   };
@@ -412,6 +418,7 @@ export default function Home() {
     const next = selectedOriginatingCalendars.includes(cal)
       ? selectedOriginatingCalendars.filter(c => c !== cal)
       : [...selectedOriginatingCalendars, cal];
+    if (!selectedOriginatingCalendars.includes(cal)) sendGAEvent('event', 'filter_source', { source: cal });
     setSelectedOriginatingCalendars(next);
     applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, selectedCategories, next, sortBy);
   };
@@ -674,6 +681,7 @@ export default function Home() {
                 onChange={(e) => {
                   const newSort = e.target.value as 'date' | 'views' | 'relevance';
                   setSortBy(newSort);
+                  sendGAEvent('event', 'sort_change', { sort_by: newSort });
                   applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, selectedCategories, selectedOriginatingCalendars, newSort);
                 }}
                 disabled={searching || scraping}
