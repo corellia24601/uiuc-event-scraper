@@ -1,8 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import { motion } from 'motion/react';
+import { Search, Sparkles, X, ChevronDown, ChevronRight, Calendar, SlidersHorizontal } from 'lucide-react';
 import { sendGAEvent } from '@next/third-parties/google';
+import { AnimatedBackground } from './components/AnimatedBackground';
+import { ScrapingLoader } from './components/ScrapingLoader';
+import { EventCard } from './components/EventCard';
+import { generateCategoryColorsMap } from './lib/categoryColors';
 
 // ── Search scoring ────────────────────────────────────────────────────────────
 
@@ -27,7 +33,6 @@ function scoreEvent(event: Event, terms: string[], queryLower: string): number {
   const desc = (event.description || '').toLowerCase();
   let score = 0;
 
-  // Exact full phrase
   if (title.includes(queryLower)) score += 200;
   else if (desc.includes(queryLower)) score += 60;
 
@@ -106,6 +111,8 @@ interface ScrapeProgress {
   currentSource: string;
 }
 
+// ── Component ─────────────────────────────────────────────────────────────────
+
 export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
   const [allEvents, setAllEvents] = useState<Event[]>([]);
@@ -125,11 +132,16 @@ export default function Home() {
   const [displayToSources, setDisplayToSources] = useState<Map<string, string[]>>(new Map());
   const [sortBy, setSortBy] = useState<'date' | 'views' | 'relevance'>('date');
   const [semanticScores, setSemanticScores] = useState<Map<number, number>>(new Map());
-  const [semanticReady, setSemanticReady] = useState(false);
+  const [categoryColors, setCategoryColors] = useState<Record<string, string>>({});
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const [setupPhase, setSetupPhase] = useState<SetupPhase>('checking');
   const [initProgress, setInitProgress] = useState(0);
   const [scrapeProgress, setScrapeProgress] = useState<ScrapeProgress>({ running: false, current: 0, total: 0, currentSource: '' });
+  const [showScrapeModal, setShowScrapeModal] = useState(false);
+  const [scrapeModalStatus, setScrapeModalStatus] = useState<'scraping' | 'success' | 'error'>('scraping');
+  const [scrapeModalProgress, setScrapeModalProgress] = useState(0);
+  const [scrapeModalSource, setScrapeModalSource] = useState('');
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -194,7 +206,7 @@ export default function Home() {
             fetchEvents('');
             fetchSources();
           }
-        } catch { /* ignore transient errors */ }
+        } catch { /* ignore transient */ }
       }, 1500);
     }
 
@@ -215,18 +227,20 @@ export default function Home() {
         : '/api/events';
       const response = await fetch(url);
       if (!response.ok) {
-        console.error('API error:', response.status);
         setAllEvents([]);
         setEvents([]);
         return;
       }
       const data = await response.json();
-      const eventArray = Array.isArray(data) ? data : [];
+      const eventArray: Event[] = Array.isArray(data) ? data : [];
       setAllEvents(eventArray);
 
-      // Extract unique source names for Event Host filter
       const sources = Array.from(new Set(eventArray.map((e: Event) => e.source_name))).sort() as string[];
       setUniqueSources(sources);
+
+      // Build category color map from unique event categories
+      const uniqueCats = Array.from(new Set(eventArray.map((e: Event) => e.category).filter(Boolean))).sort();
+      setCategoryColors(generateCategoryColorsMap(uniqueCats));
 
       applyFilters(eventArray, searchQuery, dateFrom, dateTo, selectedSources, selectedCategories, selectedOriginatingCalendars, sortBy);
     } catch (error) {
@@ -252,7 +266,6 @@ export default function Home() {
       }
       for (const cat in catMap) catMap[cat].sort();
 
-      // Build display-label → real source names map, applying merge rules for Colleges & Schools
       const dtSources = new Map<string, string[]>();
       for (const cat in catMap) {
         if (cat === 'Colleges & Schools') {
@@ -265,7 +278,6 @@ export default function Home() {
               matching.forEach(n => used.add(n));
             }
           }
-          // Unmerged sources keep their own name
           for (const name of catMap[cat]) {
             if (!used.has(name)) mergedEntries.set(name, [name]);
           }
@@ -283,7 +295,7 @@ export default function Home() {
     }
   };
 
-  const applyFilters = (
+  const applyFilters = useCallback((
     eventsToFilter: Event[],
     search: string,
     from: string,
@@ -291,10 +303,12 @@ export default function Home() {
     sources: string[],
     categories: string[],
     origCals: string[],
-    sort: 'date' | 'views' | 'relevance'
+    sort: 'date' | 'views' | 'relevance',
+    semScoresOverride?: Map<number, number>
   ) => {
     let filtered = eventsToFilter;
     let relevanceScores: Map<number, number> | null = null;
+    const activeSemScores = semScoresOverride ?? semanticScores;
 
     if (search.trim()) {
       const queryLower = search.trim().toLowerCase();
@@ -302,12 +316,11 @@ export default function Home() {
 
       const scored = filtered.map(e => {
         const kw = scoreEvent(e, terms, queryLower);
-        const sem = semanticScores.get(e.id) ?? 0;
-        // Normalise keyword score to 0–1 (cap at 300), blend 40% kw + 60% semantic
+        const sem = activeSemScores.get(e.id) ?? 0;
         const kwNorm = Math.min(kw, 300) / 300;
         const combined = sem * 60 + kwNorm * 40;
         return { event: e, kw, sem, combined };
-      }).filter(r => r.kw > 0 || r.sem >= 0.3);  // include if keyword OR semantic match
+      }).filter(r => r.kw > 0 || r.sem >= 0.3);
 
       filtered = scored.map(r => r.event);
       relevanceScores = new Map(scored.map(r => [r.event.id, r.combined]));
@@ -326,7 +339,6 @@ export default function Home() {
       filtered = filtered.filter(e => sources.includes(e.source_name));
     }
 
-    // Event Category filter: expand merged display labels to real source names, then OR
     if (categories.length > 0 || origCals.length > 0) {
       const sourceNamesSet = new Set<string>();
       for (const label of origCals) {
@@ -350,7 +362,8 @@ export default function Home() {
     }
 
     setEvents(filtered);
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [displayToSources, semanticScores]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -358,14 +371,13 @@ export default function Home() {
 
     if (!q) {
       setSemanticScores(new Map());
-      setSemanticReady(false);
-      applyFilters(allEvents, '', dateFrom, dateTo, selectedSources, selectedCategories, selectedOriginatingCalendars, sortBy);
+      setSortBy('date');
+      applyFilters(allEvents, '', dateFrom, dateTo, selectedSources, selectedCategories, selectedOriginatingCalendars, 'date');
       return;
     }
 
     setSearching(true);
 
-    // Fetch semantic scores from Cohere in parallel with keyword filtering
     let semScores = new Map<number, number>();
     try {
       const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
@@ -374,14 +386,14 @@ export default function Home() {
         semScores = new Map(data.map(r => [r.id, r.score]));
       }
     } catch {
-      // Non-fatal: fall back to keyword-only
+      // fall back to keyword-only
     }
 
     setSemanticScores(semScores);
-    setSemanticReady(true);
     setSearching(false);
+    setSortBy('relevance');
     sendGAEvent('event', 'search', { search_term: q, semantic_hits: semScores.size });
-    applyFilters(allEvents, q, dateFrom, dateTo, selectedSources, selectedCategories, selectedOriginatingCalendars, sortBy);
+    applyFilters(allEvents, q, dateFrom, dateTo, selectedSources, selectedCategories, selectedOriginatingCalendars, 'relevance', semScores);
   };
 
   const handleDateFromChange = (newDate: string) => {
@@ -441,27 +453,28 @@ export default function Home() {
     setSortBy('date');
     setSearchQuery('');
     applyFilters(allEvents, '', '', '', [], [], [], 'date');
-    // 'relevance' option disappears when query is cleared — no stale sort state
   };
 
-  const handleScrape = async () => {
+  const handleScrapeClick = async () => {
+    setShowScrapeModal(true);
+    setScrapeModalStatus('scraping');
+    setScrapeModalProgress(0);
+    setScrapeModalSource('');
     setScraping(true);
-    setScrapStatus('Starting scrape...');
+    setScrapStatus('');
+
     try {
       const response = await fetch('/api/scrape', { method: 'POST' });
       if (response.ok) {
-        setScrapStatus('Scrape completed! Loading events...');
-        await new Promise(resolve => setTimeout(resolve, 500));
+        setScrapeModalStatus('success');
         await fetchEvents();
       } else {
-        setScrapStatus('Scrape failed. Check console for details.');
+        setScrapeModalStatus('error');
       }
-    } catch (error) {
-      setScrapStatus('Error during scrape: ' + (error instanceof Error ? error.message : 'Unknown error'));
-      console.error('Scrape error:', error);
+    } catch {
+      setScrapeModalStatus('error');
     } finally {
       setScraping(false);
-      setTimeout(() => setScrapStatus(''), 2000);
     }
   };
 
@@ -472,20 +485,16 @@ export default function Home() {
 
   const formatDate = (dateStr: string) => {
     return parseLocalDate(dateStr).toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
+      weekday: 'short', month: 'short', day: 'numeric',
     });
   };
 
   const formatTimeRange = (event: Event) => {
     const sameDay = !event.end_date || event.end_date === event.start_date;
-
     if (!sameDay) {
       const dateRange = `${formatDate(event.start_date)} – ${formatDate(event.end_date)}`;
       return event.start_time ? `${dateRange}  ·  ${event.start_time}` : dateRange;
     }
-
     const datePart = formatDate(event.start_date);
     if (!event.start_time) return `${datePart}  ·  All Day`;
     const timePart = event.end_time
@@ -494,446 +503,528 @@ export default function Home() {
     return `${datePart}  ·  ${timePart}`;
   };
 
+  const getAccentColor = (category: string) => {
+    return categoryColors[category] || '#6366f1';
+  };
+
   const categoryFilterCount = selectedCategories.length + selectedOriginatingCalendars.length;
+  const hasActiveFilters = !!(dateFrom || dateTo || selectedSources.length > 0 || categoryFilterCount > 0 || sortBy !== 'date' || searchQuery);
+  const isSetupActive = setupPhase !== 'ready';
 
-  // ── Setup / loading screens ──────────────────────────────────────────────
-  if (setupPhase === 'checking') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center text-gray-500">
-          <div className="text-4xl animate-spin mb-4">⏳</div>
-          <p className="text-lg font-medium">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (setupPhase === 'initializing') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="bg-white rounded-2xl shadow-lg p-10 w-full max-w-md text-center">
-          <div className="mb-6">
-            <div className="w-16 h-16 mx-auto rounded-full bg-orange-100 flex items-center justify-center mb-4">
-              <svg className="w-8 h-8 text-orange-500 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7M9 11h6M12 8v6"/>
-              </svg>
-            </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-1">Initializing Event Source Pool</h2>
-            <p className="text-sm text-gray-500">Loading 30+ UIUC event sources...</p>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-            <div
-              className="h-3 rounded-full bg-orange-500 transition-all duration-200 ease-out"
-              style={{ width: `${initProgress}%` }}
-            />
-          </div>
-          <p className="text-xs text-gray-400 mt-2">{initProgress}%</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (setupPhase === 'scraping') {
-    const pct = scrapeProgress.total > 0
+  const setupProgress = setupPhase === 'initializing'
+    ? initProgress
+    : setupPhase === 'scraping' && scrapeProgress.total > 0
       ? Math.round((scrapeProgress.current / scrapeProgress.total) * 100)
       : 0;
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="bg-white rounded-2xl shadow-lg p-10 w-full max-w-md text-center">
-          <div className="mb-6">
-            <div className="w-16 h-16 mx-auto rounded-full bg-blue-100 flex items-center justify-center mb-4">
-              <svg className="w-8 h-8 text-blue-600 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582M20 20v-5h-.581M5.635 15A9 9 0 1 0 4.582 9"/>
-              </svg>
+
+  // ── Sidebar JSX (reused in both desktop and mobile) ───────────────────────
+
+  const renderSidebar = () => (
+    <div className="space-y-4">
+      {/* Sort */}
+      <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2.5" style={{ fontFamily: 'Montserrat, sans-serif' }}>Sort By</p>
+        <select
+          value={sortBy}
+          onChange={(e) => {
+            const newSort = e.target.value as 'date' | 'views' | 'relevance';
+            setSortBy(newSort);
+            sendGAEvent('event', 'sort_change', { sort_by: newSort });
+            applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, selectedCategories, selectedOriginatingCalendars, newSort);
+          }}
+          disabled={searching || scraping}
+          className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60 cursor-pointer"
+          style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 500 }}
+        >
+          <option value="date">Date (Earliest First)</option>
+          <option value="views">Views (Most Popular)</option>
+          <option value="relevance" disabled={!searchQuery.trim()}>
+            {searchQuery.trim() ? 'Relevance' : 'Relevance (search first)'}
+          </option>
+        </select>
+      </div>
+
+      {/* Date range */}
+      <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2.5" style={{ fontFamily: 'Montserrat, sans-serif' }}>Date Range</p>
+        <div className="space-y-2">
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-medium text-gray-500" style={{ fontFamily: 'Montserrat, sans-serif' }}>From</label>
+              {dateFrom && (
+                <button type="button" onClick={() => handleDateFromChange('')}
+                  className="text-[11px] text-gray-400 hover:text-red-500 transition-colors">Clear ×</button>
+              )}
             </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-1">Scraping Events</h2>
-            <p className="text-sm text-gray-500 min-h-[1.25rem]">
-              {scrapeProgress.currentSource
-                ? `Fetching: ${scrapeProgress.currentSource}...`
-                : 'Starting up...'}
-            </p>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-            <div
-              className="h-3 rounded-full bg-blue-600 transition-all duration-500 ease-out"
-              style={{ width: `${pct}%` }}
+            <input type="date" lang="en-US" value={dateFrom}
+              onChange={(e) => handleDateFromChange(e.target.value)}
+              disabled={searching || scraping}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60"
             />
           </div>
-          <p className="text-xs text-gray-400 mt-2">
-            {scrapeProgress.total > 0
-              ? `${scrapeProgress.current} / ${scrapeProgress.total} sources  ·  ${pct}%`
-              : 'Preparing sources...'}
-          </p>
-          <p className="text-xs text-gray-400 mt-4">This takes 3–5 minutes on first run.</p>
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-medium text-gray-500" style={{ fontFamily: 'Montserrat, sans-serif' }}>To</label>
+              {dateTo && (
+                <button type="button" onClick={() => handleDateToChange('')}
+                  className="text-[11px] text-gray-400 hover:text-red-500 transition-colors">Clear ×</button>
+              )}
+            </div>
+            <input type="date" lang="en-US" value={dateTo}
+              onChange={(e) => handleDateToChange(e.target.value)}
+              disabled={searching || scraping}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60"
+            />
+          </div>
         </div>
       </div>
-    );
-  }
 
-  // ── Normal events feed ────────────────────────────────────────────────────
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">UIUC Event Scraper</h1>
-            <div className="flex space-x-4">
-              <Link
-                href="/sources"
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-              >
-                Manage Sources
-              </Link>
-              <button
-                onClick={handleScrape}
-                disabled={scraping || loading}
-                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {scraping ? (
-                  <>
-                    <span className="inline-block animate-spin">⏳</span>
-                    Scraping...
-                  </>
-                ) : (
-                  'Scrape Events'
-                )}
-              </button>
-            </div>
-          </div>
-          {scrapStatus && (
-            <div className={`mt-3 text-sm ${scrapStatus.includes('failed') || scrapStatus.includes('Error') ? 'text-red-600' : 'text-green-600'}`}>
-              {scrapStatus}
-            </div>
-          )}
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <form onSubmit={handleSearch} className="mb-8">
-          {/* Search Bar */}
-          <div className="flex gap-4 mb-6">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search events..."
-              disabled={searching || scraping}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md bg-white text-black placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-            />
-            <button
-              type="submit"
-              disabled={searching || scraping}
-              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {searching ? (
-                <>
-                  <span className="inline-block animate-spin">⏳</span>
-                  Searching...
-                </>
-              ) : (
-                'Search'
+      {/* Category filter */}
+      {Object.keys(categoryCalendars).length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-2.5">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-1.5" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+              Category
+              {categoryFilterCount > 0 && (
+                <span className="normal-case font-bold bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full text-[10px]">
+                  {categoryFilterCount}
+                </span>
               )}
-            </button>
-          </div>
-
-          {/* Date Range + Sort By */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-medium text-gray-700">Start Date</label>
-                {dateFrom && (
-                  <button type="button" onClick={() => handleDateFromChange('')}
-                    className="text-xs text-gray-400 hover:text-red-500">
-                    Clear ×
-                  </button>
-                )}
-              </div>
-              <input
-                type="date" lang="en-US" value={dateFrom}
-                onChange={(e) => handleDateFromChange(e.target.value)}
-                disabled={searching || scraping}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-medium text-gray-700">End Date</label>
-                {dateTo && (
-                  <button type="button" onClick={() => handleDateToChange('')}
-                    className="text-xs text-gray-400 hover:text-red-500">
-                    Clear ×
-                  </button>
-                )}
-              </div>
-              <input
-                type="date" lang="en-US" value={dateTo}
-                onChange={(e) => handleDateToChange(e.target.value)}
-                disabled={searching || scraping}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-              />
-            </div>
-
-            <div className="lg:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
-              <select
-                value={sortBy}
-                onChange={(e) => {
-                  const newSort = e.target.value as 'date' | 'views' | 'relevance';
-                  setSortBy(newSort);
-                  sendGAEvent('event', 'sort_change', { sort_by: newSort });
-                  applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, selectedCategories, selectedOriginatingCalendars, newSort);
-                }}
-                disabled={searching || scraping}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-              >
-                <option value="date">Date (Earliest First)</option>
-                <option value="views">Views (Most Popular First)</option>
-                {searchQuery.trim() && <option value="relevance">Relevance</option>}
-              </select>
-            </div>
-          </div>
-
-          {/* Event Host + Event Category — checkbox filters */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            {/* Event Host */}
-            {uniqueSources.length > 0 && (
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    Event Host
-                    <span className="ml-2 text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
-                      {uniqueSources.length}
-                    </span>
-                    {selectedSources.length > 0 && (
-                      <span className="ml-1 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                        {selectedSources.length} selected
-                      </span>
-                    )}
-                  </label>
-                  {selectedSources.length > 0 && (
-                    <button type="button"
-                      onClick={() => { setSelectedSources([]); applyFilters(allEvents, searchQuery, dateFrom, dateTo, [], selectedCategories, selectedOriginatingCalendars, sortBy); }}
-                      className="text-xs text-gray-400 hover:text-red-500">
-                      Clear ×
-                    </button>
-                  )}
-                </div>
-                <div className="border border-gray-300 rounded-md max-h-64 overflow-y-auto bg-white divide-y divide-gray-100">
-                  {uniqueSources.map(source => (
-                    <label key={source}
-                      className={`flex items-center gap-3 px-3 py-2 cursor-pointer text-sm select-none transition-colors ${selectedSources.includes(source) ? 'bg-blue-50 text-blue-800' : 'hover:bg-gray-50 text-gray-800'}`}>
-                      <input
-                        type="checkbox"
-                        checked={selectedSources.includes(source)}
-                        onChange={() => handleSourceToggle(source)}
-                        disabled={searching || scraping}
-                        className="accent-blue-600 w-4 h-4 shrink-0"
-                      />
-                      {source}
-                    </label>
-                  ))}
-                </div>
-                <p className="text-xs text-gray-400 mt-1">Check one or more hosts to filter</p>
-              </div>
+            </p>
+            {categoryFilterCount > 0 && (
+              <button type="button"
+                onClick={() => { setSelectedCategories([]); setSelectedOriginatingCalendars([]); applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, [], [], sortBy); }}
+                className="text-[11px] text-gray-400 hover:text-red-500 transition-colors">
+                Clear
+              </button>
             )}
-
-            {/* Event Category (hierarchical) */}
-            {Object.keys(categoryCalendars).length > 0 && (
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    Category
-                    <span className="ml-2 text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
-                      {Object.values(categoryCalendars).reduce((sum, arr) => sum + arr.length, 0)}
+          </div>
+          <div className="max-h-64 overflow-y-auto space-y-0.5 pr-1"
+            style={{ scrollbarWidth: 'thin', scrollbarColor: '#E5E7EB #F9FAFB' }}>
+            {Object.keys(categoryCalendars).sort().map(cat => {
+              const cals = categoryCalendars[cat];
+              const isExpanded = expandedCategories.has(cat);
+              const catChecked = selectedCategories.includes(cat);
+              const dotColor = getAccentColor(cat);
+              return (
+                <div key={cat}>
+                  <div className={`flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors cursor-pointer ${catChecked ? 'bg-blue-50' : 'hover:bg-gray-50'}`}>
+                    <input type="checkbox" checked={catChecked}
+                      onChange={() => handleCategoryToggle(cat)}
+                      disabled={searching || scraping}
+                      className="w-3.5 h-3.5 shrink-0 cursor-pointer rounded accent-blue-500"
+                    />
+                    <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: dotColor }} />
+                    <span
+                      className={`flex-1 text-xs select-none ${catChecked ? 'text-blue-700 font-semibold' : 'text-gray-700 font-medium'}`}
+                      onClick={() => handleCategoryToggle(cat)}
+                      style={{ fontFamily: 'Montserrat, sans-serif' }}
+                    >
+                      {cat}
+                      <span className="ml-1 text-gray-400 font-normal text-[10px]">({cals.length})</span>
                     </span>
-                    {categoryFilterCount > 0 && (
-                      <span className="ml-1 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                        {categoryFilterCount} selected
-                      </span>
+                    {cals.length > 0 && (
+                      <button type="button" onClick={() => toggleCategoryExpand(cat)}
+                        className="text-gray-300 hover:text-gray-600 transition-colors w-4 h-4 flex items-center justify-center shrink-0">
+                        {isExpanded
+                          ? <ChevronDown className="w-3 h-3" />
+                          : <ChevronRight className="w-3 h-3" />}
+                      </button>
                     )}
-                  </label>
-                  {categoryFilterCount > 0 && (
-                    <button type="button"
-                      onClick={() => {
-                        setSelectedCategories([]);
-                        setSelectedOriginatingCalendars([]);
-                        applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, [], [], sortBy);
-                      }}
-                      className="text-xs text-gray-400 hover:text-red-500">
-                      Clear ×
-                    </button>
-                  )}
-                </div>
-                <div className="border border-gray-300 rounded-md max-h-64 overflow-y-auto bg-white divide-y divide-gray-100">
-                  {Object.keys(categoryCalendars).sort().map(cat => {
-                    const cals = categoryCalendars[cat];
-                    const isExpanded = expandedCategories.has(cat);
-                    const catChecked = selectedCategories.includes(cat);
-
+                  </div>
+                  {isExpanded && cals.map(cal => {
+                    const calChecked = selectedOriginatingCalendars.includes(cal);
                     return (
-                      <div key={cat}>
-                        {/* Primary row */}
-                        <div className={`flex items-center gap-2 px-3 py-2 ${catChecked ? 'bg-blue-50' : 'hover:bg-gray-50'}`}>
-                          <input
-                            type="checkbox"
-                            checked={catChecked}
-                            onChange={() => handleCategoryToggle(cat)}
-                            disabled={searching || scraping}
-                            className="accent-blue-600 w-4 h-4 shrink-0"
-                          />
-                          <span
-                            className={`flex-1 text-sm cursor-pointer select-none flex items-center gap-1.5 ${catChecked ? 'text-blue-800 font-medium' : 'text-gray-800'}`}
-                            onClick={() => handleCategoryToggle(cat)}
-                          >
-                            {cat}
-                            {cals.length > 0 && (
-                              <span className="text-xs bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded-full font-normal">
-                                {cals.length}
-                              </span>
-                            )}
-                          </span>
-                          {cals.length > 0 && (
-                            <button
-                              type="button"
-                              onClick={() => toggleCategoryExpand(cat)}
-                              className="text-gray-400 hover:text-gray-600 w-5 h-5 flex items-center justify-center rounded text-xs shrink-0"
-                            >
-                              {isExpanded ? '▼' : '▶'}
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Secondary rows — originating calendars */}
-                        {isExpanded && cals.map(cal => {
-                          const calChecked = selectedOriginatingCalendars.includes(cal);
-                          return (
-                            <label key={cal}
-                              className={`flex items-center gap-3 pl-9 pr-3 py-1.5 cursor-pointer text-sm select-none transition-colors border-t border-gray-50 ${calChecked ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-500'}`}>
-                              <input
-                                type="checkbox"
-                                checked={calChecked}
-                                onChange={() => handleOrigCalToggle(cal)}
-                                disabled={searching || scraping}
-                                className="accent-blue-600 w-4 h-4 shrink-0"
-                              />
-                              {cal}
-                            </label>
-                          );
-                        })}
-                      </div>
+                      <label key={cal}
+                        className={`flex items-center gap-2 pl-8 pr-2 py-1 rounded-lg cursor-pointer text-xs select-none transition-colors ${calChecked ? 'bg-blue-50 text-blue-600 font-medium' : 'hover:bg-gray-50 text-gray-500'}`}
+                        style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                        <input type="checkbox" checked={calChecked}
+                          onChange={() => handleOrigCalToggle(cal)}
+                          disabled={searching || scraping}
+                          className="accent-blue-500 w-3 h-3 shrink-0"
+                        />
+                        {cal}
+                      </label>
                     );
                   })}
                 </div>
-                <p className="text-xs text-gray-400 mt-1">Select a category or expand ▶ to filter by specific source</p>
-              </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Event Host filter */}
+      {uniqueSources.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-2.5">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-1.5" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+              Event Host
+              {selectedSources.length > 0 && (
+                <span className="normal-case font-bold bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full text-[10px]">
+                  {selectedSources.length}
+                </span>
+              )}
+            </p>
+            {selectedSources.length > 0 && (
+              <button type="button"
+                onClick={() => { setSelectedSources([]); applyFilters(allEvents, searchQuery, dateFrom, dateTo, [], selectedCategories, selectedOriginatingCalendars, sortBy); }}
+                className="text-[11px] text-gray-400 hover:text-red-500 transition-colors">
+                Clear
+              </button>
             )}
           </div>
-
-          {/* Clear Filters Button */}
-          {(dateFrom || dateTo || selectedSources.length > 0 || categoryFilterCount > 0 || sortBy !== 'date' || searchQuery) && (
-            <div className="mb-6">
-              <button
-                type="button"
-                onClick={handleClearFilters}
-                className="px-4 py-2 text-sm bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
-              >
-                Clear All Filters
-              </button>
-            </div>
-          )}
-
-          {searching && (
-            <div className="flex items-center gap-2 text-blue-600">
-              <span className="inline-block animate-spin text-lg">○</span>
-              <span>Searching events...</span>
-            </div>
-          )}
-        </form>
-
-        {loading ? (
-          <div className="text-center py-12 text-gray-600">
-            <div className="inline-block">
-              <div className="animate-spin text-3xl mb-2">⏳</div>
-              <p>{scraping ? 'Scraping events...' : 'Loading events...'}</p>
-            </div>
+          <div className="max-h-52 overflow-y-auto space-y-0.5 pr-1"
+            style={{ scrollbarWidth: 'thin', scrollbarColor: '#E5E7EB #F9FAFB' }}>
+            {uniqueSources.map(source => (
+              <label key={source}
+                className={`flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer text-xs select-none transition-colors ${selectedSources.includes(source) ? 'bg-blue-50 text-blue-700 font-semibold' : 'hover:bg-gray-50 text-gray-600'}`}
+                style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                <input type="checkbox" checked={selectedSources.includes(source)}
+                  onChange={() => handleSourceToggle(source)}
+                  disabled={searching || scraping}
+                  className="accent-blue-500 w-3.5 h-3.5 shrink-0 cursor-pointer"
+                />
+                {source}
+              </label>
+            ))}
           </div>
-        ) : (
-          <>
-            {/* Results Summary */}
-            <div className="mb-6 text-sm text-gray-600">
-              <p>
-                Showing <span className="font-semibold text-gray-900">{events.length}</span> of{' '}
-                <span className="font-semibold text-gray-900">{allEvents.length}</span> events
-                {(dateFrom || dateTo || selectedSources.length > 0 || categoryFilterCount > 0 || searchQuery) && (
-                  <span className="block mt-2">
-                    Filters active:{' '}
+        </div>
+      )}
+
+      {/* Clear all */}
+      {hasActiveFilters && (
+        <motion.button
+          type="button"
+          onClick={handleClearFilters}
+          className="w-full py-2.5 flex items-center justify-center gap-2 text-xs font-semibold text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl border-2 border-gray-200 hover:border-red-300 transition-all duration-150"
+          style={{ fontFamily: 'Montserrat, sans-serif' }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <X className="w-3.5 h-3.5" />
+          Clear All Filters
+        </motion.button>
+      )}
+    </div>
+  );
+
+  // ── Render ────────────────────────────────────────────────────────────────
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-x-hidden">
+      <AnimatedBackground />
+
+      {/* ── Setup overlay (checking / initializing / scraping) ── */}
+      <ScrapingLoader
+        isOpen={isSetupActive}
+        onClose={() => {}}
+        status={setupPhase as 'checking' | 'initializing' | 'scraping'}
+        progress={setupProgress}
+        currentSource={scrapeProgress.currentSource}
+        message={
+          setupPhase === 'scraping' && scrapeProgress.total > 0
+            ? `${scrapeProgress.current} / ${scrapeProgress.total} sources`
+            : undefined
+        }
+      />
+
+      {/* ── Manual scrape modal ── */}
+      <ScrapingLoader
+        isOpen={showScrapeModal}
+        onClose={() => setShowScrapeModal(false)}
+        status={scrapeModalStatus}
+        progress={scrapeModalProgress}
+        currentSource={scrapeModalSource}
+        eventsFound={scrapeModalStatus === 'success' ? events.length : 0}
+        message={
+          scrapeModalStatus === 'success' ? 'Successfully scraped new events!' :
+          scrapeModalStatus === 'error' ? 'Failed to scrape. Please try again.' : undefined
+        }
+      />
+
+      {/* ── Header ── */}
+      <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 gap-4">
+
+            {/* Brand */}
+            <motion.div
+              className="flex items-center gap-3 min-w-0"
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <h1
+                  className="text-xl sm:text-2xl bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-500 bg-clip-text text-transparent truncate"
+                  style={{ fontFamily: 'Montserrat, var(--font-montserrat, sans-serif)', fontWeight: 800 }}
+                >
+                  UIUC Event Scraper
+                </h1>
+                <p className="text-[11px] text-gray-400 hidden sm:block whitespace-nowrap" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                  · Discover events at UIUC
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Actions */}
+            <motion.div
+              className="flex items-center gap-2 shrink-0"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
+            >
+              <Link
+                href="/sources"
+                className="hidden sm:inline-flex items-center gap-2 bg-white border-2 border-blue-200 text-blue-600 px-4 py-2 rounded-full text-sm shadow-sm hover:shadow-md hover:border-blue-500 transition-all duration-200 font-semibold"
+                style={{ fontFamily: 'Montserrat, sans-serif' }}
+              >
+                Manage Sources
+              </Link>
+              <motion.button
+                onClick={handleScrapeClick}
+                disabled={scraping || loading}
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-5 py-2 rounded-full text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+                style={{ fontFamily: 'Montserrat, sans-serif' }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <motion.div
+                  className="absolute inset-0 bg-white/20"
+                  initial={{ x: '-100%' }}
+                  whileHover={{ x: '100%' }}
+                  transition={{ duration: 0.4 }}
+                />
+                <Sparkles className="w-4 h-4 relative z-10" />
+                <span className="relative z-10">{scraping ? 'Scraping…' : 'Scrape Events'}</span>
+              </motion.button>
+
+            </motion.div>
+          </div>
+        </div>
+      </header>
+
+      {/* ── Search bar ── */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-3xl mx-auto px-4 py-4">
+          <motion.form
+            onSubmit={handleSearch}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
+            <div className="relative flex gap-2 items-center">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search events by topic, keyword, or description…"
+                  disabled={searching || scraping}
+                  className="w-full pl-11 pr-4 py-3 rounded-full border-2 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:ring-0 focus:border-blue-400 transition-all duration-200 disabled:opacity-60"
+                  style={{ fontFamily: 'Montserrat, sans-serif' }}
+                />
+              </div>
+              <motion.button
+                type="submit"
+                disabled={searching || scraping}
+                className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-full text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 relative overflow-hidden group whitespace-nowrap"
+                style={{ fontFamily: 'Montserrat, sans-serif' }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                <motion.div
+                  className="absolute inset-0 bg-white/20"
+                  initial={{ x: '-100%' }}
+                  whileHover={{ x: '100%' }}
+                  transition={{ duration: 0.4 }}
+                />
+                <span className="relative z-10">{searching ? 'Searching…' : 'Search'}</span>
+              </motion.button>
+            </div>
+          </motion.form>
+        </div>
+      </div>
+
+      {/* ── Main layout ── */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
+
+          {/* ── Desktop sidebar ── */}
+          <aside className="hidden lg:block w-64 shrink-0 sticky top-20">
+            {renderSidebar()}
+          </aside>
+
+          {/* ── Mobile filters (inline, between search and results) ── */}
+          <div className="lg:hidden w-full">
+            <button
+              type="button"
+              onClick={() => setMobileFiltersOpen(prev => !prev)}
+              className="w-full flex items-center justify-between px-4 py-3 bg-white rounded-xl border border-gray-200 shadow-sm mb-3"
+              style={{ fontFamily: 'Montserrat, sans-serif' }}
+            >
+              <span className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                <SlidersHorizontal className="w-4 h-4 text-blue-500" />
+                Filters
+                {hasActiveFilters && (
+                  <span className="bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                     {[
-                      searchQuery && `Search: "${searchQuery}"`,
-                      dateFrom && `From ${dateFrom}`,
-                      dateTo && `To ${dateTo}`,
-                      selectedSources.length > 0 && `${selectedSources.length} host(s)`,
-                      selectedCategories.length > 0 && `${selectedCategories.length} categor${selectedCategories.length === 1 ? 'y' : 'ies'}`,
-                      selectedOriginatingCalendars.length > 0 && `${selectedOriginatingCalendars.length} calendar(s)`,
-                      sortBy === 'views' && 'Sorted by views',
-                    ].filter(Boolean).join(', ')}
+                      selectedCategories.length,
+                      selectedOriginatingCalendars.length,
+                      selectedSources.length,
+                      dateFrom ? 1 : 0,
+                      dateTo ? 1 : 0,
+                    ].reduce((a, b) => a + b, 0)}
                   </span>
                 )}
-              </p>
-            </div>
-
-            <div className="grid gap-6">
-            {events && events.length > 0 ? (
-              events.map((event) => (
-                <Link key={event.id} href={`/events/${event.id}`}>
-                  <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer">
-                    <div className="flex justify-between items-start gap-3 mb-3">
-                      <h3 className="text-lg font-semibold text-gray-900 leading-snug">{event.title}</h3>
-                      <span className="shrink-0 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded whitespace-nowrap">
-                        {event.category}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-sm text-gray-700 mb-1">
-                      <svg className="w-4 h-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                        <line x1="16" y1="2" x2="16" y2="6"/>
-                        <line x1="8" y1="2" x2="8" y2="6"/>
-                        <line x1="3" y1="10" x2="21" y2="10"/>
-                      </svg>
-                      <span className="font-medium">{formatTimeRange(event)}</span>
-                    </div>
-
-                    {event.location && (
-                      <div className="flex items-center gap-2 text-sm text-gray-700 mb-1">
-                        <svg className="w-4 h-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                          <circle cx="12" cy="9" r="2.5"/>
-                        </svg>
-                        <span>{event.location}</span>
-                      </div>
-                    )}
-
-                    {event.description && (
-                      <p className="text-sm text-gray-500 mt-2 mb-3 line-clamp-2">{event.description}</p>
-                    )}
-
-                    <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
-                      <span className="text-xs text-gray-400">{event.source_name}</span>
-                      <span className="text-sm text-blue-600 hover:text-blue-800 font-medium">View Details →</span>
-                    </div>
-                  </div>
-                </Link>
-              ))
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                No events found. Initialize sources and click "Scrape Events" to load upcoming events, or adjust your search.
-              </div>
+              </span>
+              <ChevronDown
+                className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${mobileFiltersOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+            {mobileFiltersOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.25 }}
+                className="mb-4 overflow-hidden"
+              >
+                {renderSidebar()}
+              </motion.div>
             )}
-            </div>
-          </>
-        )}
+          </div>
+
+          {/* ── Events list ── */}
+          <div className="flex-1 min-w-0">
+
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-24 text-gray-400">
+                <div className="w-10 h-10 rounded-full border-2 border-blue-200 border-t-blue-500 animate-spin mb-4" />
+                <p className="text-sm font-medium" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                  {scraping ? 'Scraping events…' : 'Loading events…'}
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Results bar */}
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-sm text-gray-500" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                      <span className="font-bold text-gray-800">
+                        {events.length}
+                      </span>
+                      <span className="text-gray-400"> / </span>
+                      <span className="font-semibold text-gray-600">{allEvents.length}</span>
+                      <span className="ml-1 text-gray-400">events</span>
+                    </p>
+                    {searchQuery && (
+                      <span className="inline-flex items-center gap-1 text-xs bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full font-medium" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                        <Search className="w-3 h-3" />
+                        &ldquo;{searchQuery}&rdquo;
+                      </span>
+                    )}
+                    {selectedCategories.length > 0 && (
+                      <span className="text-xs bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full font-medium" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                        {selectedCategories.length} categor{selectedCategories.length === 1 ? 'y' : 'ies'}
+                      </span>
+                    )}
+                    {selectedOriginatingCalendars.length > 0 && (
+                      <span className="text-xs bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full font-medium" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                        {selectedOriginatingCalendars.length} source{selectedOriginatingCalendars.length > 1 ? 's' : ''}
+                      </span>
+                    )}
+                    {selectedSources.length > 0 && (
+                      <span className="text-xs bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full font-medium" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                        {selectedSources.length} host{selectedSources.length > 1 ? 's' : ''}
+                      </span>
+                    )}
+                    {(dateFrom || dateTo) && (
+                      <span className="text-xs bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full font-medium" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                        {dateFrom && dateTo ? `${dateFrom} → ${dateTo}` : dateFrom ? `From ${dateFrom}` : `Until ${dateTo}`}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Sort tabs — always visible; Relevance enabled only when searching */}
+                  <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1 shrink-0">
+                    {([
+                      { value: 'relevance', label: '✦ Relevance' },
+                      { value: 'date',      label: 'Date' },
+                      { value: 'views',     label: 'Popular' },
+                    ] as const).map(({ value, label }) => {
+                      const isRelevance = value === 'relevance';
+                      const disabled = isRelevance && !searchQuery.trim();
+                      return (
+                        <button
+                          key={value}
+                          onClick={() => {
+                            if (disabled) return;
+                            setSortBy(value);
+                            sendGAEvent('event', 'sort_change', { sort_by: value });
+                            applyFilters(allEvents, searchQuery, dateFrom, dateTo, selectedSources, selectedCategories, selectedOriginatingCalendars, value);
+                          }}
+                          title={disabled ? 'Enter a search query first' : undefined}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ${
+                            disabled
+                              ? 'text-gray-300 cursor-not-allowed'
+                              : sortBy === value
+                                ? 'bg-white text-blue-700 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700 cursor-pointer'
+                          }`}
+                          style={{ fontFamily: 'Montserrat, sans-serif' }}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Event cards */}
+                {events.length > 0 ? (
+                  <div className="space-y-4">
+                    {events.map((event, idx) => (
+                      <EventCard
+                        key={event.id}
+                        href={`/events/${event.id}`}
+                        title={event.title}
+                        dateTimeStr={formatTimeRange(event)}
+                        location={event.location || undefined}
+                        description={event.description || undefined}
+                        source={event.source_name}
+                        category={event.category}
+                        accentColor={getAccentColor(event.category)}
+                        index={idx}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-24 text-center">
+                    <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-4 border border-gray-200">
+                      <Search className="w-7 h-7 text-gray-300" />
+                    </div>
+                    <p className="font-bold text-gray-700 mb-1" style={{ fontFamily: 'Montserrat, sans-serif' }}>No events found</p>
+                    <p className="text-sm text-gray-400 max-w-xs leading-relaxed" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                      Try adjusting your search or filters. On a fresh install, click{' '}
+                      <span className="font-semibold text-blue-500">Scrape Events</span> to load upcoming events.
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
       </main>
+
+      <style>{`
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #F9FAFB; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #D1D5DB; }
+      `}</style>
     </div>
   );
 }
