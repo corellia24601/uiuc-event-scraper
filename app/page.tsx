@@ -236,6 +236,9 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const categoryFilterCount = selectedCategories.length + selectedOriginatingCalendars.length;
+  const hasActiveFilters = !!(dateFrom || dateTo || selectedSources.length > 0 || categoryFilterCount > 0 || sortBy !== 'date' || searchQuery);
+
   // Exit / last-state tracking
   useEffect(() => {
     const handleVisibility = () => {
@@ -541,8 +544,6 @@ export default function Home() {
     return categoryColors[category] || '#6366f1';
   };
 
-  const categoryFilterCount = selectedCategories.length + selectedOriginatingCalendars.length;
-  const hasActiveFilters = !!(dateFrom || dateTo || selectedSources.length > 0 || categoryFilterCount > 0 || sortBy !== 'date' || searchQuery);
   const isSetupActive = setupPhase !== 'ready';
 
   const setupProgress = setupPhase === 'initializing'
