@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { Calendar, MapPin } from 'lucide-react';
+import { sendGAEvent } from '@next/third-parties/google';
 
 interface EventCardProps {
   href: string;
@@ -25,7 +26,7 @@ export function EventCard({
   accentColor,
 }: EventCardProps) {
   return (
-    <Link href={href} className="block group">
+    <Link href={href} className="block group" onClick={() => sendGAEvent('event', 'event_view', { title, category, source })}>
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 relative">
         {/* Left accent strip */}
         <div className="absolute left-0 top-0 bottom-0 w-1 shrink-0" style={{ backgroundColor: accentColor }} />

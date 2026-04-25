@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
 import { Calendar, MapPin, Clock, ExternalLink, ArrowLeft, Share2, Users, Tag, Globe, Mail } from 'lucide-react';
 import { AnimatedBackground } from '../../components/AnimatedBackground';
+import { sendGAEvent } from '@next/third-parties/google';
 import { generateCategoryColorsMap } from '../../lib/categoryColors';
 
 interface Event {
@@ -181,6 +182,7 @@ export default function EventDetail() {
                 href={sourceLinks[0].url}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => sendGAEvent('event', 'original_link_click', { title: event.title, url: sourceLinks[0].url })}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold text-white shadow-sm transition-all hover:shadow-md hover:opacity-90 relative overflow-hidden group"
                 style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)`, fontFamily: FF }}
               >
@@ -285,6 +287,7 @@ export default function EventDetail() {
                         href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={() => sendGAEvent('event', 'original_link_click', { title: event.title, url: link.url })}
                         className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-white shadow-md hover:shadow-lg hover:opacity-90 transition-all relative overflow-hidden group"
                         style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor}bb)`, fontFamily: FF }}
                       >
