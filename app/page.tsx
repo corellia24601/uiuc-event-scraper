@@ -218,6 +218,40 @@ export default function Home() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Scroll depth tracking
+  useEffect(() => {
+    const milestones = new Set<number>();
+    const handleScroll = () => {
+      const scrollable = document.body.scrollHeight - window.innerHeight;
+      if (scrollable <= 0) return;
+      const pct = Math.round((window.scrollY / scrollable) * 100);
+      for (const m of [25, 50, 75, 100]) {
+        if (pct >= m && !milestones.has(m)) {
+          milestones.add(m);
+          sendGAEvent('event', 'scroll_depth', { depth: m });
+        }
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Exit / last-state tracking
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        sendGAEvent('event', 'page_exit', {
+          search_query: searchQuery || '(none)',
+          results_shown: events.length,
+          sort_by: sortBy,
+          filters_active: hasActiveFilters ? 'yes' : 'no',
+        });
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [searchQuery, events.length, sortBy, hasActiveFilters]);
+
   const fetchEvents = async (query: string = '') => {
     setSearching(true);
     setLoading(true);
